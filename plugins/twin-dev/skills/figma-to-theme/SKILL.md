@@ -79,8 +79,9 @@ existing section + blocks:
 
 - Prefer building the layout in `templates/*.json` with existing sections and blocks
   and their settings (spacing, alignment, colour, width).
-- Only create a new section or block when no existing one can do it. Follow the
-  `horizon-theme` skill when you do.
+- Only create a new section, block, snippet or asset when no existing one can do
+  it. Name it with a `cc-` prefix (`sections/cc-feature-banner.liquid`) and follow
+  the `horizon-theme` skill when you do.
 - Keep section IDs in templates stable when editing an existing template.
 - Mobile: compare the mobile frame and use the mobile-specific settings
   (`*_mobile`) where they exist.

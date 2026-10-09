@@ -39,6 +39,27 @@ layouts, templates, sections, blocks, snippets, settings, and components.
 Search for an existing section, block, snippet, setting group, style utility, or
 component before adding one. Extend the contract that already owns the behavior.
 
+### Custom files (`cc-` prefix)
+
+When a Figma design needs a section, block, snippet, or asset that the theme doesn't
+have, create it with a `cc-` prefix in the filename. This keeps custom work separate
+from the base theme's files and avoids clashes when the theme is updated.
+
+- Sections: `sections/cc-feature-banner.liquid`.
+- Blocks: `blocks/cc-icon-list.liquid`. Internal blocks keep the leading underscore:
+  `blocks/_cc-icon-list-item.liquid`.
+- Snippets: `snippets/cc-usp-item.liquid`.
+- Assets: `assets/cc-feature-banner.css`, `assets/cc-countdown.js`,
+  `assets/cc-icon-truck.svg`. Map a custom module as `@theme/cc-countdown` in the
+  import map.
+- Schemas: when the package has a `schemas/` source, give the matching source file
+  the same `cc-` name.
+- Reference the new file by its full name everywhere: `{% render 'cc-usp-item' %}`,
+  `"type": "cc-icon-list"` in templates, presets and accepted block lists.
+- Only new files take the prefix. Edits to existing theme files keep their original
+  names. Don't copy a base-theme file to a `cc-` name just to change it; extend the
+  existing file unless the change would break its current contract.
+
 ## Merchant settings
 
 Treat settings as public customization APIs. Add them for choices a merchant should
