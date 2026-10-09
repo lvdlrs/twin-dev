@@ -32,7 +32,9 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 |---|---|
 | `/twin-dev:horizon-theme` | Horizon conventions. Loads automatically when editing theme code. |
 | `/twin-dev:shopify-theme-deploy` | Safe preview / push / pull / publish with Shopify CLI. Manual only. |
+| `/twin-dev:new-store-theme` | Start a store build: copy the base Horizon theme into a new project folder, name it `<Store> x Hv<version>(Momentum in progress...)`, push it unpublished, then build the Figma design. |
 | `/twin-dev:figma-to-theme` | Pull colours, type, spacing and layouts from Figma into theme settings and sections. |
+| `/twin-dev:shopify-menus` | Create, update, back up and restore navigation menus in the Shopify admin (via `shopify store execute`). |
 
 ### Agents
 

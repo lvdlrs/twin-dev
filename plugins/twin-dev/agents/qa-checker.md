@@ -102,4 +102,39 @@ Measure from the design context, not by eye, when values are close (for example
    inferred mobile layout or supply frames.
 5. **Client to provide** (content, images, links, menu items, missing mobile
    designs that need sign-off).
-6. **Manual checks** you couldn't do, with the exact steps.
+6. **Your manual QA to-do list**: a checkbox list the developer works through
+   in person after your pass. Build it from this theme and this run, not a
+   generic template, and follow the rules below.
+
+### Manual QA to-do list
+
+The developer has read your findings and now checks the theme personally. Give
+them a list they can tick off in order, or paste into a task tracker.
+
+- Write each item as `- [ ] <where> — <what to do> — <what you should see>`, with
+  the full preview URL or the theme editor path, for example
+  `- [ ] /products/linen-shirt (390px) — pick a sold-out size — button reads "Sold out" and is disabled`.
+- Group the items under headings in this order:
+  1. **Re-check fixes**: one item for each Must fix and Should fix finding, so
+     they can confirm it after it's fixed.
+  2. **Things you couldn't check**: no browser, no preview URL, no Figma access,
+     a page you couldn't reach. Turn each one into concrete steps.
+  3. **Needs a human**: things a tool can't judge or shouldn't do:
+     - a real iPhone (Safari) and a real Android phone (Chrome), plus one
+       desktop browser other than Chrome;
+     - how animations, hover states, sticky header, sliders and drawers feel;
+     - a test order with the Bogus gateway or Shopify Payments test mode,
+       through to the order confirmation email (you never do this);
+     - submitting the contact form and newsletter signup, and checking where
+       they arrive;
+     - theme editor: open each built template, change a setting and a block in
+       every custom (`cc-`) section, and check it updates without breaking;
+     - keyboard-only pass through header, menu drawer, product form and cart,
+       and a quick screen-reader spot check;
+     - PageSpeed Insights for home, a collection and a product.
+  4. **Links and content to finish**: every menu item and section link set to
+     `#`, each with the page or collection it should point to, plus any
+     placeholder images or copy still in place.
+- Don't repeat checks you completed and passed. List only what still needs
+  human eyes, so the list stays short enough to finish.
+- End with the number of items in each group.
