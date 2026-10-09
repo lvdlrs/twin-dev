@@ -34,19 +34,25 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 | `/twin-dev:shopify-theme-deploy` | Safe preview / push / pull / publish with Shopify CLI. Manual only. |
 | `/twin-dev:new-store-theme` | Start a store build: copy the base Horizon theme into a new project folder, name it `<Store> x Hv<version>(Momentum in progress...)`, push it unpublished, then build the Figma design. |
 | `/twin-dev:figma-to-theme` | Pull colours, type, spacing and layouts from Figma into theme settings and sections. |
+| `/twin-dev:shopify-files` | Download images from Figma, upload them to Shopify Files with alt text, and set them in the theme's image settings. |
 | `/twin-dev:shopify-menus` | Create, update, back up and restore navigation menus in the Shopify admin (via `shopify store execute`). |
 
 ### Agents
 
 | Agent | Use |
 |---|---|
+| `store-builder` | Build or continue a store from Figma end to end: project folder, unpublished theme, tokens, sections, menus, images. Run `qa-checker` after it. |
 | `theme-reviewer` | Review changed Liquid/schema/CSS/JS before pushing. |
 | `theme-explorer` | Find where something is rendered, styled or configured. |
 | `accessibility-auditor` | WCAG 2.2 AA audit of sections and components. |
 | `schema-locale-checker` | Cross-check schemas, presets, templates and translation keys. |
 | `qa-checker` | Pre-launch / pre-handoff QA pass. |
 
-Ask for an agent in plain words, for example "use the theme-reviewer agent on my changes".
+Ask for an agent in plain words, for example "use the theme-reviewer agent on my changes", or:
+
+```
+Use the store-builder agent: store "Acme Coffee Co", Figma <link>, store acme-coffee.myshopify.com
+```
 
 ## Add more
 

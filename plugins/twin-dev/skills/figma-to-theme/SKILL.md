@@ -101,9 +101,12 @@ menus as that skill's step 4 describes.
 
 ## 6. Assets
 
-- Use `download_assets` for images and icons the theme needs.
-- Product and content photos belong in Shopify Files or on resources, not in
-  `assets/`. Tell the user which images to upload and where they're used.
+- Content images (logo, favicon, hero and banner images, collection list and
+  section images): follow the `shopify-files` skill. It downloads them, uploads
+  them to Shopify Files with alt text, and sets the image settings to
+  `shopify://shop_images/<filename>`.
+- Product photos and images of existing collections belong on the product or
+  collection. List them for the merchant.
 - SVG icons that become part of the theme UI can go in `assets/` or a snippet.
   Mark them `aria-hidden="true"` when decorative.
 

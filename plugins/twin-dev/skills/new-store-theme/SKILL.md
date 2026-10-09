@@ -106,5 +106,5 @@ editor. After that, pull before pushing, as `shopify-theme-deploy` says.
 
 - theme name, folder path and base version;
 - store, theme ID, preview and editor URLs;
-- the `figma-to-theme` report (tokens, section mapping, menus, `#` links, what the merchant still
+- the `figma-to-theme` report (tokens, section mapping, menus, uploaded images, `#` links, what the merchant still
   has to supply).

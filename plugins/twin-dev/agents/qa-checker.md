@@ -133,8 +133,9 @@ them a list they can tick off in order, or paste into a task tracker.
        and a quick screen-reader spot check;
      - PageSpeed Insights for home, a collection and a product.
   4. **Links and content to finish**: every menu item and section link set to
-     `#`, each with the page or collection it should point to, plus any
-     placeholder images or copy still in place.
+     `#`, each with the page or collection it should point to, any images in
+     Shopify Files or image settings with no alt text that aren't decorative,
+     plus any placeholder images or copy still in place.
 - Don't repeat checks you completed and passed. List only what still needs
   human eyes, so the list stays short enough to finish.
 - End with the number of items in each group.
