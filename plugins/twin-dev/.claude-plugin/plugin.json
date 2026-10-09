@@ -1,0 +1,8 @@
+{
+  "name": "twin-dev",
+  "version": "1.0.0",
+  "description": "Shopify Horizon theme skills and agents: conventions, deploy, Figma-to-theme, review, accessibility, schema/locale and QA checks.",
+  "author": {
+    "name": "lvdlrs"
+  }
+}

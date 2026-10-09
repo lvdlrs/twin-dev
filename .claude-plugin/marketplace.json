@@ -1,0 +1,13 @@
+{
+  "name": "twin-dev",
+  "owner": {
+    "name": "lvdlrs"
+  },
+  "plugins": [
+    {
+      "name": "twin-dev",
+      "source": "./plugins/twin-dev",
+      "description": "Shopify Horizon theme skills and agents: conventions, deploy, Figma-to-theme, review, accessibility, schema/locale and QA checks."
+    }
+  ]
+}
