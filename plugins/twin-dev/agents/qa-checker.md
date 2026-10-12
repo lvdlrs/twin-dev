@@ -82,6 +82,10 @@ check.
 4. Say which differences come from the theme's limits (a setting doesn't exist,
    a Shopify font isn't available) rather than build mistakes.
 
+If you were given a **QA later** list from `figma-to-theme` (pages skipped because
+the theme already matched), check every page on it, desktop and mobile, even if
+you'd otherwise only sample pages. Mark them "QA later" in the design-match table.
+
 Measure from the design context, not by eye, when values are close (for example
 24px vs 32px gap). Ignore sub-pixel and font-rendering differences.
 
