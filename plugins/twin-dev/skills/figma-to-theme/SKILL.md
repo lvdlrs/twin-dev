@@ -18,6 +18,10 @@ components.
 
 ## 0. Open the file
 
+- Use the Figma link the user gave. If they gave none, use `figmaUrl` from the
+  project's `.twin-dev.json`; if that's empty too, ask for this store's link. Save
+  the link as `figmaUrl` in `.twin-dev.json` (ask first if it replaces a different
+  one), so `qa-checker` and later sessions use the same file.
 - Parse the link: `figma.com/design/<fileKey>/<name>?node-id=<a>-<b>` → `fileKey`,
   `nodeId` `a:b`. `node-id=0-1` is a whole canvas page, not a frame. `m=dev` (Dev
   Mode) and `p=f` don't matter. For `/design/<fileKey>/branch/<branchKey>/`, use
@@ -322,7 +326,7 @@ exact match for a Figma section. Write the mapping out like this:
 
 When the page is built, check it before moving on:
 
-1. If the project has a theme ID (`.twin-dev.json`), push the changed files to
+1. If the project has a theme ID (`themeId` in `.twin-dev.json`), push the changed files to
    it as the `shopify-theme-deploy` skill describes. Otherwise run
    `shopify theme dev` and use the local preview URL.
 2. With a browser tool, screenshot the page at 1440px and 390px and compare it
@@ -374,7 +378,8 @@ Finish with:
 - images to upload, each with its file name, section and setting;
 - the **QA later** list: pages skipped because the theme already matched, each
   with its template, Figma frame and how it was checked. Pass this list to the
-  `qa-checker` agent with the Figma link and preview URL so it checks those pages 1:1;
+  `qa-checker` agent (it reads the store, theme and Figma link from
+  `.twin-dev.json`) so it checks those pages 1:1;
 - menus created, and every menu item or section link set to `#`, with what it
   should link to;
 - design details the theme can't reproduce without custom code;

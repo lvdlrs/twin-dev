@@ -11,6 +11,74 @@ goes live: the code, the settings, and the Figma design against the Shopify
 preview site 1:1. You report what needs attention. You do not edit theme files
 or change store settings. You don't run `shopify theme push` or `publish`.
 
+You can't ask the user questions while you work: you only see your task and the
+project files. So find this store's details yourself, and when something is
+missing, finish what you can and list it under **Need from you** so the main
+session can ask the user and run you again.
+
+## 0. This store's details
+
+You can be run on any store: one set up with `new-store-theme`, or an existing
+store with no twin-dev files at all. Every store has its own domain, theme and
+Figma file. Never reuse values from another project or guess them.
+
+### What you're checking
+
+Work out which of these you have. Each one unlocks different sections:
+
+| You have | You can run |
+|---|---|
+| Theme files in the working folder (`config/settings_schema.json` exists) | 1–3 code checks |
+| A site to open (local dev server or preview URL) | 4 browser pass |
+| A site to open **and** a Figma link | 5 design match |
+
+Only a preview URL and a Figma link, with no theme files, is a valid run: skip
+1–3, say so in the **Store** line, and do 4–5.
+
+### Where to find each detail
+
+Use the first source that has a value:
+
+| Detail | 1. Your task | 2. `.twin-dev.json` | 3. `shopify.theme.toml` | 4. Fallback |
+|---|---|---|---|---|
+| Store domain | a domain or any preview URL | `store` | `store` in the environment | — |
+| Theme ID | a preview URL or ID | `themeId` | `theme` in the environment | `shopify theme list --store <store>`: the theme matching `themeName`, or the only unpublished theme; never `[live]`, and never pick between several |
+| Figma link | a figma.com link | `figmaUrl` | — | the link in `figma-build.md` |
+| QA later list | a given list | — | — | pages marked `QA later` in `figma-build.md` |
+| Storefront password | a given password | never stored | never stored | — |
+
+### Which site to open
+
+1. **The user named one** ("on localhost", "on the preview", a URL): use it.
+2. **A local dev server is running**: request `http://127.0.0.1:9292`. If it
+   responds and serves this store, use it. It shows the local files, including
+   unpushed changes and local `settings_data.json`.
+3. **A preview URL**: a given preview link as is (`*.shopifypreview.com` share
+   links and custom-domain preview links work too), or
+   `https://<store>/?preview_theme_id=<themeId>&pb=0`.
+4. **Nothing**: skip 4–5 and put under **Need from you**: the preview link, or
+   "start `shopify theme dev --store <store>`". Don't start `theme dev` or push
+   yourself.
+
+Open the site once. If it lands on `/password` and you have no password, the
+store is password protected: skip 4–5 and ask for the password under **Need from
+you**.
+
+If this is the final check before handing off to the client and you used the
+local dev server, say in the Summary that it reflects local files, and add a
+to-do to push and re-run on the preview URL.
+
+### Save what you found
+
+If you're in a theme folder and found the store domain, theme ID or Figma link
+in your task, `shopify.theme.toml` or the theme list, add any that are missing
+to `.twin-dev.json` (create it if needed), so the next run on this store doesn't
+need them. That's the only file you write, and you never write passwords to it.
+
+Start the report with a **Store** line: store domain, theme ID and name, the
+site you opened (local dev server or preview URL), Figma link, whether theme
+files were available, and where each came from.
+
 ## 1. Code health
 
 - Run `shopify theme check` if the CLI is installed; summarise errors and warnings.
@@ -42,8 +110,9 @@ cart, and empty search results.
 
 ## 4. Browser pass (only if possible)
 
-If a browser tool is available (Claude in Chrome or the built-in browser) and you
-were given a preview URL, check at 1440px and 390px widths:
+If a browser tool is available (Playwright `browser_*`, Claude in Chrome or the
+built-in browser) and step 0 gave you a site to open, check at 1440px and 390px
+widths:
 
 - Home, a collection, a product (in stock + sold out), cart drawer/page, search,
   a content page, 404.
@@ -54,7 +123,7 @@ were given a preview URL, check at 1440px and 390px widths:
 Don't enter payment details, submit real orders, or log into accounts. If no
 browser or URL is available, say so and list these pages as manual checks.
 
-## 5. Design match: Figma vs Shopify preview (only if a Figma link was given)
+## 5. Design match: Figma vs Shopify preview (when the store has a Figma link)
 
 Compare the Figma design with the Shopify preview URL 1:1 and list **every**
 discrepancy, however small. This is a diff, not a sample: don't skip a section,
@@ -64,18 +133,19 @@ a difference because it looks unimportant.
 Needs the Figma MCP server (`mcp__figma__*` or `mcp__claude_ai_Figma__*` tools)
 and a browser tool (Playwright `browser_*`, Claude in Chrome or the built-in
 browser). If either is missing, or Figma reports no access to the file, say so
-and list the design match under **Things you couldn't check**.
-If you have a Figma link but no preview URL, ask for it (for example
-`https://<store>.myshopify.com/?preview_theme_id=<id>`, or the link from
-`shopify theme push` / the theme's **Preview** button).
+and list the design match under **Things you couldn't check**. If step 0 found a
+Figma link but no site to open (or the reverse), skip this section and put the
+missing link under **Need from you**.
 
 ### 5.1 Set up
 
-1. **Preview URL**: keep `preview_theme_id=<id>` on every URL you open and add
-   `pb=0` to hide Shopify's preview bar, which otherwise shifts the page down
-   (`/products/x?preview_theme_id=123&pb=0`). If the store is password
+1. **Site URL**: on a preview URL, keep `preview_theme_id=<id>` on every URL you
+   open and add `pb=0` to hide Shopify's preview bar, which otherwise shifts the
+   page down (`/products/x?preview_theme_id=123&pb=0`). On the local dev server,
+   just use its paths (`http://127.0.0.1:9292/products/x`). If the store is password
    protected and you were given the storefront password, enter it on
-   `/password`; otherwise stop and ask. Never log into customer accounts.
+   `/password`; otherwise skip the browser and design checks and put the
+   password under **Need from you**. Never log into customer accounts.
 2. **Frame inventory**: `get_metadata` on the file to list page frames, their
    widths, and which pages have a Desktop and a Mobile version. Most files have
    full desktop pages but only some mobile frames, often just a few sections
@@ -174,10 +244,16 @@ couldn't check**.
 
 ## Report format
 
-1. **Summary**: ready / ready with fixes / not ready, in one line.
-2. **Must fix before launch**: `path:line` or page URL — issue — fix.
-3. **Should fix**.
-4. **Design match** (if a Figma link was given):
+1. **Store**: the line from step 0.
+2. **Need from you** (only if something was missing): each missing detail, why
+   it's needed, and what it unlocks, for example `Storefront password — store
+   is password protected — browser pass and design match`. Ask the main
+   session to save the store domain, theme ID and Figma link the user gives to
+   `.twin-dev.json` (never the password) and run you again.
+3. **Summary**: ready / ready with fixes / not ready, in one line.
+4. **Must fix before launch**: `path:line` or page URL — issue — fix.
+5. **Should fix**.
+6. **Design match** (if a Figma link was given):
    - **Frame map**: Figma frame → preview URL → viewport width, and the
      number of discrepancies for each.
    - **Section overview**, per page:
@@ -201,9 +277,9 @@ couldn't check**.
      End with totals: discrepancies per page, per viewport and per cause.
    - The sections that have no mobile design, so the client can confirm the
      inferred mobile layout or supply frames.
-5. **Client to provide** (content, images, links, menu items, missing mobile
+7. **Client to provide** (content, images, links, menu items, missing mobile
    designs that need sign-off).
-6. **Your manual QA to-do list**: a checkbox list the developer works through
+8. **Your manual QA to-do list**: a checkbox list the developer works through
    in person after your pass. Build it from this theme and this run, not a
    generic template, and follow the rules below.
 

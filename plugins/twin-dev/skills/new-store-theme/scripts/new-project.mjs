@@ -3,7 +3,8 @@
 //
 // Usage:
 //   node new-project.mjs --store "<Store name>" [--base <path>] [--dest <dir>]
-//                        [--short <abbr>] [--dry-run]
+//                        [--short <abbr>] [--domain <store>.myshopify.com]
+//                        [--figma <figma.com link>] [--dry-run]
 //
 //   --store    Store / brand name as the client writes it (required)
 //   --base     Base theme folder. Defaults to $TWIN_DEV_BASE_THEME.
@@ -11,9 +12,13 @@
 //              then the Capital Commerce Projects folder (DEFAULT_PROJECTS_DIR).
 //   --short    Abbreviation to use when the full theme name is over 50 characters.
 //              Defaults to the store name's initials.
+//   --domain   The store's <store>.myshopify.com domain, saved as `store`.
+//   --figma    The store's Figma design link, saved as `figmaUrl`.
 //   --dry-run  Print the plan without copying anything.
 //
-// Prints JSON: { storeName, version, themeName, folderName, folderPath, baseTheme }.
+// Writes .twin-dev.json (this store's details: store, themeId, figmaUrl, ...)
+// into the new folder.
+// Prints JSON: { storeName, version, themeName, folderName, folderPath, baseTheme, store, figmaUrl }.
 // Exits 1 if the base theme is invalid, the name can't fit, or the folder exists.
 
 import { cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -43,7 +48,11 @@ if (!existsSync(projectsDir)) fail(`Projects folder doesn't exist: ${projectsDir
 const folderPath = join(projectsDir, folderName);
 if (existsSync(folderPath)) fail(`Folder already exists: ${folderPath}`);
 
-const plan = { storeName, version, themeName, folderName, folderPath, baseTheme };
+const store = normaliseDomain(args.domain);
+const figmaUrl = (args.figma || "").trim() || null;
+if (figmaUrl && !/^https:\/\/(www\.)?figma\.com\//.test(figmaUrl)) fail(`Not a Figma link: ${figmaUrl}`, 2);
+
+const plan = { storeName, version, themeName, folderName, folderPath, baseTheme, store, figmaUrl };
 
 if (!args["dry-run"]) {
   cpSync(baseTheme, folderPath, {
@@ -52,7 +61,7 @@ if (!args["dry-run"]) {
   });
   writeFileSync(
     join(folderPath, ".twin-dev.json"),
-    JSON.stringify({ ...plan, createdAt: new Date().toISOString(), store: null, themeId: null }, null, 2) + "\n",
+    JSON.stringify({ ...plan, createdAt: new Date().toISOString(), themeId: null }, null, 2) + "\n",
   );
 }
 
@@ -65,6 +74,13 @@ function buildThemeName(name, ver, short) {
   const abbreviated = make(short || initials(name));
   if (abbreviated.length <= MAX_THEME_NAME) return abbreviated;
   fail(`Theme name is ${abbreviated.length} characters, over ${MAX_THEME_NAME}: "${abbreviated}". Pass a shorter --short.`);
+}
+
+function normaliseDomain(value) {
+  const domain = (value || "").trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+  if (!domain) return null;
+  if (!/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(domain)) fail(`Pass the <store>.myshopify.com domain, not: ${value}`, 2);
+  return domain;
 }
 
 function initials(name) {

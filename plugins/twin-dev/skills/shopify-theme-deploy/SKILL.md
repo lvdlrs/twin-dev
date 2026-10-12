@@ -14,6 +14,24 @@ Follow this workflow when moving theme code to or from a Shopify store. The bigg
 risk is overwriting merchant customizations stored in `config/settings_data.json`
 and `templates/*.json`, so treat those files with care.
 
+## Store details
+
+Every store is different, so nothing here is hardcoded. This store's details live
+in `.twin-dev.json` in the project root (the folder with
+`config/settings_schema.json`):
+
+| Key | Example |
+|---|---|
+| `store` | `acme-coffee.myshopify.com` |
+| `themeId` | `123456789012` (the unpublished build theme) |
+| `figmaUrl` | `https://www.figma.com/design/<fileKey>/...` |
+
+Read it first. A value the user gives in this conversation wins; if it differs
+from the saved one, ask which is right. If a value is missing, ask for it once,
+then save it to the file so the next skill doesn't ask again. Never guess a store
+domain or reuse one from another project. Shopify CLI doesn't upload root files,
+so the file stays local.
+
 ## 0. Preflight
 
 Run these and report the results before doing anything else:
@@ -23,7 +41,9 @@ shopify version
 shopify theme list --store <store>.myshopify.com
 ```
 
-- Confirm the store domain with the user. Never guess it.
+- Use `store` from `.twin-dev.json` and confirm it with the user. Never guess it.
+- Use `themeId` from `.twin-dev.json` as the target theme. When a push with
+  `--unpublished` creates a new theme, save its ID as `themeId`.
 - Note the **live** theme (`[live]`) ID. Never push to it unless the user explicitly
   says to push to the live theme in this conversation.
 - If the folder is a git repo, check `git status` and mention uncommitted changes.

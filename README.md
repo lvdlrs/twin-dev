@@ -48,6 +48,30 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 
 Ask for an agent in plain words, for example "use the theme-reviewer agent on my changes".
 
+## Per-store details
+
+Every store has its own domain, theme and Figma design, so nothing is hardcoded.
+`new-store-theme` writes them to `.twin-dev.json` in the store's project folder,
+and every skill and agent reads them from there:
+
+```json
+{ "store": "acme-coffee.myshopify.com", "themeId": 123456789012, "figmaUrl": "https://www.figma.com/design/..." }
+```
+
+A value given in the conversation overrides the file. Missing values are asked
+for once and saved back. Storefront passwords are never saved.
+
+`qa-checker` also works on an existing store with no `.twin-dev.json`: give it
+the preview link (and the Figma link for a design match), or run it in a theme
+folder that has `shopify.theme.toml`. It uses a running `shopify theme dev`
+(`http://127.0.0.1:9292`) when there is one, otherwise the preview URL, and saves
+what it found to `.twin-dev.json` for next time.
+
+Agents can't ask questions mid-run. When `qa-checker` is missing something (a
+Figma link, the theme ID, the storefront password), it finishes what it can and
+returns a **Need from you** list: ask the user for each item, save the domain,
+theme ID and Figma link to `.twin-dev.json`, and run it again.
+
 ## Add more
 
 - Skill: `plugins/twin-dev/skills/<name>/SKILL.md` with `name` and `description` frontmatter.

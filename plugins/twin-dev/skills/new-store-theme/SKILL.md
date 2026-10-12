@@ -25,7 +25,7 @@ Collect these before you start. Ask for anything that's missing; never guess it.
 | Input | Notes |
 |---|---|
 | Store name | As the client writes it, for example `Acme Coffee Co`. |
-| Figma link | `figma.com/design/...`. It can come later, but step 4 needs it. |
+| Figma link | `figma.com/design/...`, this store's design. It can come later, but step 4 needs it. |
 | Base theme folder | `$TWIN_DEV_BASE_THEME`, or ask. Suggest setting the env var so you don't have to ask next time. |
 | Store domain | `<store>.myshopify.com`, needed for the push. |
 | Projects folder | Always `D:\Lenmuel Del Rosario\Documents\Employer\Capital Commerce\Projects` (the script's default). `$TWIN_DEV_PROJECTS_DIR` or `--dest` overrides it. Don't ask. |
@@ -50,8 +50,10 @@ git -C "<base>" status -sb
 Preview the plan first:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/new-store-theme/scripts/new-project.mjs" --store "<Store name>" --base "<base>" --dry-run
+node "${CLAUDE_PLUGIN_ROOT}/skills/new-store-theme/scripts/new-project.mjs" --store "<Store name>" --base "<base>" --domain <store>.myshopify.com --figma "<figma link>" --dry-run
 ```
+
+Leave out `--domain` or `--figma` if you don't have them yet.
 
 The script:
 
@@ -74,8 +76,10 @@ The script:
 Show the user the theme name and folder path. If the name was abbreviated, ask
 whether the initials are fine. Then run it again without `--dry-run`. It copies
 the theme without `.git`, `node_modules` and `.shopify`. It also writes
-`.twin-dev.json` (store name, version, theme name) in the new folder. Shopify CLI
-doesn't upload root files, so this file stays local.
+`.twin-dev.json` in the new folder: this store's details (store name, version,
+theme name, `store` domain, `figmaUrl`, and `themeId` once pushed). Every other
+twin-dev skill and the `qa-checker` agent read it, so they work on this store
+without asking again. Shopify CLI doesn't upload root files, so it stays local.
 
 From here on, work only in the new folder. Never edit the base theme.
 
@@ -90,7 +94,7 @@ shopify theme push --store <store>.myshopify.com --unpublished --theme "<theme n
 
 - This is a new theme, so push every file with no `--ignore` flags.
 - Save the store domain and the new theme ID into `.twin-dev.json` (`store`,
-  `themeId`).
+  `themeId`). If the Figma link arrived after step 2, save it as `figmaUrl`.
 - Give the user the preview and editor URLs.
 
 ## 4. Build the design

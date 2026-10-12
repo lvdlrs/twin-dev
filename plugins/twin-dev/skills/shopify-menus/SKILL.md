@@ -18,9 +18,29 @@ request.
 Put query and variables files in your scratchpad or a temp directory, never in the
 theme folder.
 
+## Store details
+
+Every store is different, so nothing here is hardcoded. This store's details live
+in `.twin-dev.json` in the project root (the folder with
+`config/settings_schema.json`):
+
+| Key | Example |
+|---|---|
+| `store` | `acme-coffee.myshopify.com` |
+| `themeId` | `123456789012` (the unpublished build theme) |
+| `figmaUrl` | `https://www.figma.com/design/<fileKey>/...` |
+
+Read it first. A value the user gives in this conversation wins; if it differs
+from the saved one, ask which is right. If a value is missing, ask for it once,
+then save it to the file so the next skill doesn't ask again. Never guess a store
+domain or reuse one from another project. Shopify CLI doesn't upload root files,
+so the file stays local.
+
 ## 0. Access
 
-Confirm the store domain (`<store>.myshopify.com`) with the user. Never guess it.
+Use `store` from `.twin-dev.json` and confirm it with the user before the first
+change. If you're not in a project folder or it's missing, ask for the
+`<store>.myshopify.com` domain. Never guess it.
 
 ### Default: Shopify CLI store commands
 
