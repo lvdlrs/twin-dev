@@ -24,6 +24,7 @@ Collect these before you start. Ask for anything that's missing; never guess it.
 | Figma link | `figma.com/design/...`. It can come later, but step 4 needs it. |
 | Base theme folder | `$TWIN_DEV_BASE_THEME`, or ask. Suggest setting the env var so you don't have to ask next time. |
 | Store domain | `<store>.myshopify.com`, needed for the push. |
+| Projects folder | Always `D:\Lenmuel Del Rosario\Documents\Employer\Capital Commerce\Projects` (the script's default). `$TWIN_DEV_PROJECTS_DIR` or `--dest` overrides it. Don't ask. |
 
 ## 1. Update the base theme
 
@@ -56,9 +57,15 @@ The script:
   Shopify allows at most 50 characters, so when the full name is too long it
   uses the store's initials (`The Really Long Brand Co` → `TRLBC`). Pass
   `--short "<abbr>"` to use a different abbreviation;
-- builds the **folder name** `<store-slug>-hv<version>` (for example
-  `acme-coffee-co-hv3.1.0`), next to the base theme folder unless you pass
-  `--dest <dir>`.
+- builds the **folder name** `<Store> x Horizon <version>` (for example
+  `Acme Coffee Co x Horizon 4.2.0`), keeping the store name as written minus
+  characters Windows doesn't allow in folder names;
+- puts it in the Projects folder
+  (`D:\Lenmuel Del Rosario\Documents\Employer\Capital Commerce\Projects`)
+  unless `$TWIN_DEV_PROJECTS_DIR` or `--dest <dir>` says otherwise;
+- stops if that folder already exists. Never delete or overwrite an existing
+  project folder: tell the user and ask whether to work in the existing folder
+  or use a different store name.
 
 Show the user the theme name and folder path. If the name was abbreviated, ask
 whether the initials are fine. Then run it again without `--dry-run`. It copies

@@ -7,7 +7,8 @@
 //
 //   --store    Store / brand name as the client writes it (required)
 //   --base     Base theme folder. Defaults to $TWIN_DEV_BASE_THEME.
-//   --dest     Parent directory for the new folder. Defaults to the base theme's parent.
+//   --dest     Parent directory for the new folder. Defaults to $TWIN_DEV_PROJECTS_DIR,
+//              then the Capital Commerce Projects folder (DEFAULT_PROJECTS_DIR).
 //   --short    Abbreviation to use when the full theme name is over 50 characters.
 //              Defaults to the store name's initials.
 //   --dry-run  Print the plan without copying anything.
@@ -16,10 +17,11 @@
 // Exits 1 if the base theme is invalid, the name can't fit, or the folder exists.
 
 import { cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 
 const MAX_THEME_NAME = 50;
 const SUFFIX = "(Momentum in progress...)";
+const DEFAULT_PROJECTS_DIR = "D:/Lenmuel Del Rosario/Documents/Employer/Capital Commerce/Projects";
 const SKIP = new Set([".git", "node_modules", ".shopify", ".DS_Store", "Thumbs.db", ".twin-dev.json"]);
 
 const args = parseArgs(process.argv.slice(2));
@@ -35,8 +37,10 @@ if (!existsSync(schemaPath)) fail(`Not a theme folder (missing config/settings_s
 const version = readThemeVersion(schemaPath);
 
 const themeName = buildThemeName(storeName, version, args.short);
-const folderName = `${slugify(storeName)}-hv${version}`;
-const folderPath = join(resolve(args.dest || dirname(baseTheme)), folderName);
+const folderName = `${safeFolderName(storeName)} x Horizon ${version}`;
+const projectsDir = resolve(args.dest || process.env.TWIN_DEV_PROJECTS_DIR || DEFAULT_PROJECTS_DIR);
+if (!existsSync(projectsDir)) fail(`Projects folder doesn't exist: ${projectsDir}`);
+const folderPath = join(projectsDir, folderName);
 if (existsSync(folderPath)) fail(`Folder already exists: ${folderPath}`);
 
 const plan = { storeName, version, themeName, folderName, folderPath, baseTheme };
@@ -71,14 +75,13 @@ function initials(name) {
     .toUpperCase();
 }
 
-function slugify(name) {
+// Keep the store name as written, minus characters Windows doesn't allow in folder names.
+function safeFolderName(name) {
   return name
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[. ]+$/, "");
 }
 
 function readThemeVersion(path) {
