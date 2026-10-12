@@ -53,7 +53,8 @@ browser or URL is available, say so and list these pages as manual checks.
 ## 5. Design match (only if a Figma link was given)
 
 Check the built pages match the Figma design 1:1. Needs the Figma MCP server
-(`mcp__figma__*` tools); if it isn't available, say so and list this as a manual
+(`mcp__figma__*` or `mcp__claude_ai_Figma__*` tools); if it isn't available, or it
+reports no edit access to the file, say so and list this as a manual
 check.
 
 1. `get_metadata` on the file to list the page frames and which ones have a

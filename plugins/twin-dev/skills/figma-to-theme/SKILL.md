@@ -8,23 +8,63 @@ description: Extract layouts, brand colours, typography and spacing from a Figma
 Turn a Figma design into theme changes. Work through the theme's existing settings
 and components first; only write new code for what the settings can't express.
 
-Requires the Figma MCP server (`mcp__figma__*` tools). If they aren't available, tell
-the user to connect Figma and stop.
+Requires the Figma MCP server. Its tools are named `mcp__figma__*` or
+`mcp__claude_ai_Figma__*` depending on how it's connected. If neither is
+available, tell the user to connect Figma and stop. Load the `figma-design-to-code`
+skill (or the `skill://figma/figma-design-to-code/SKILL.md` resource) before the
+first `get_design_context` call, as the Figma server requires. Treat its output as
+a reference: here the target is theme settings and existing blocks, not new
+components.
+
+## 0. Open the file
+
+- Parse the link: `figma.com/design/<fileKey>/<name>?node-id=<a>-<b>` → `fileKey`,
+  `nodeId` `a:b`. `node-id=0-1` is a whole canvas page, not a frame. `m=dev` (Dev
+  Mode) and `p=f` don't matter. For `/design/<fileKey>/branch/<branchKey>/`, use
+  `branchKey`.
+- Call `get_metadata` with only `fileKey` first to list the canvas pages.
+- **"You don't have edit access to this file"** means the Figma account connected
+  to the MCP server can't read the file. It isn't a rate limit, so don't retry.
+  Stop and ask the user to either share the file with that account as an editor,
+  or duplicate it into a team where that account is an editor and send the new
+  link. Don't rebuild the design from public screenshots or guesses.
+- A rate-limit error: wait, then fetch fewer, smaller nodes.
 
 ## 1. Read the design
 
-For the link the user gave:
+1. **Inventory.** `get_metadata` on each canvas page. Build a page × viewport table
+   before anything else and show it to the user:
 
-1. `get_metadata` on the file or page to list the frames (Desktop / Mobile / pages /
-   components / style guide).
-2. `get_variable_defs` on the style-guide frame (or the main page frame) to collect
-   colour, typography, spacing and radius variables.
-3. `get_screenshot` of each page frame so you can see the layout.
-4. `get_design_context` on each frame or section you'll build, one at a time. Don't
-   pull a whole page at once if it's large.
+   | Page | Desktop frame (width) | Mobile frame (width) | Notes |
+   |---|---|---|---|
+   | Home | `12:34` (1440) | `56:78` (390), hero and menu only | |
+   | Product | `90:12` (1440) | — | |
+   | Style guide | `3:4` | | colours, type, buttons |
+   | Components / states | `7:8` | | hover, cart drawer, mega menu |
+
+   Mobile designs are often partial (a few sections, or only header and menu).
+   Record exactly which sections have a mobile frame; the build and `qa-checker`
+   both depend on it. Also look for frames that show states rather than pages:
+   hover, open mega menu, mobile drawer, cart drawer, search overlay, empty cart,
+   sold out, form errors.
+2. **Tokens.** `get_variable_defs` on the style-guide frame and on one desktop
+   page frame. It returns the variables and styles the nodes use, so a page frame
+   catches tokens the style guide misses. Collect colours, text styles (family,
+   weight, size, line height, letter spacing, case), spacing, radius and shadows.
+3. **Screenshots.** `get_screenshot` of each page frame (raise `maxDimension` to
+   ~2000 for long pages, or screenshot sections separately) so you see the layout.
+4. **Details.** `get_design_context` on each section you'll build, one at a time.
+   If it returns only metadata because the node is too big, call it on the child
+   section nodes instead. Don't pull a whole page at once.
 
 If the file has no variables or styles, read colours and fonts from the design
-context and say they were inferred.
+context and say they were inferred. Count the distinct text styles the pages
+actually use; designers often have more than the theme's six heading slots (see
+the typography note in step 2).
+
+Ignore hidden layers, frames named like `old`, `v1`, `archive`, `wip` or
+`unused`, and anything outside page frames, unless the user says otherwise. If
+two frames look like versions of the same page, ask which one is final.
 
 ## 2. Build a token sheet
 
@@ -123,6 +163,21 @@ How to convert Figma values to this theme:
 - **Radii and border widths** are ranges with their own limits (button radius
   0–100, inputs 0–32, cards 0–16, popovers 0–16, button/input borders 0–4). Clamp
   to the range and list anything clamped.
+- **Desktop and mobile values.** The base theme scales every desktop/mobile pair
+  (type sizes, gaps, custom widths, spacers) linearly from the mobile value at
+  375px to the desktop value at 1440px (`snippets/cc-fluid-value.liquid`). Take
+  desktop values from the 1440 frame and mobile values from the mobile frame (a
+  375 or 390 frame both work). If the desktop frame isn't 1440 wide (1280, 1920),
+  scale values to 1440 or ask. If there's no mobile frame for a token, leave
+  the mobile setting at the theme value and say so; don't invent a smaller size.
+- **More text styles than slots.** Map the most used styles to H1–H6 and
+  paragraph by size, not by the layer name ("Heading/XL" might be the theme's
+  H2). List the rest and set them per block with the `text` block's
+  `type_preset: custom` (font, weight, size, line height, letter spacing, case).
+  If one extra style repeats across many sections, ask whether it should take a
+  heading slot instead.
+- **Shadows** only exist for popovers (`popover_drop_shadow`) and layered
+  slides. List any other designed shadow as a difference.
 - Check contrast for every text/background and button pair (4.5:1 body text, 3:1
   large text and UI). Flag failing pairs from the design rather than silently
   changing them.
@@ -144,14 +199,64 @@ After the user approves the token sheet:
 
 ## 4. Map the layout to sections
 
-Work through the Figma pages one at a time.
+### Read this store's theme
+
+Every store's theme ends up with different sections, blocks and layouts, so
+don't work from memory or from another project. From the project folder, run:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/figma-to-theme/scripts/theme-inventory.mjs" --theme .
+```
+
+It reads the theme's own files and prints:
+
+- every section with its presets, allowed blocks and whether it's limited to the
+  header or footer group;
+- every theme block with the child blocks it accepts (`_` blocks are internal and
+  only work where a parent lists them);
+- what each template and section group holds now, section by section, with
+  block trees.
+
+Custom `cc-` files are marked ★. Before you set a section or block's values, get
+its settings with `--detail <type>[,<type>]` (types, ranges, options, defaults,
+preset block trees). Add `--settings` to list setting IDs for everything.
+Re-run it after you add a `cc-` file. If what you remember about the theme
+disagrees with the script's output, go with the script.
+
+### Order
+
+Work through the Figma pages one at a time, in this order: header and footer,
+home, product, collection, then content pages. Header, footer and the product
+card appear on every page, so match them first.
+
+Keep a build log at `figma-build.md` in the project root: the inventory table,
+then one row per page with its status (`todo`, `building`, `built`, `QA later`),
+template, Figma frame and open questions. Update it after each page, so the work
+can continue in a later session. Shopify CLI doesn't upload root files, so it
+stays local.
+
+### Header, footer and global components
+
+- Header and footer live in `sections/header-group.json` and
+  `sections/footer-group.json`, not in templates. The inventory shows which
+  sections each group holds and which sections can only go in a group (in the
+  base theme: announcement bar, header, quick links, footer, copyright row).
+  Match logo position, menu row, search, sticky and icon vs text actions in the
+  header settings.
+- Product card: find the card in the design and set up the product card block
+  and its children (gallery, title, price, swatches, quick shop) once. Then reuse
+  that setup in every section that shows cards; the inventory's block trees show
+  which ones do.
+- Drawers, popovers and the cart drawer take their colours from the global
+  settings in step 3. Check any state frames (cart drawer, mega menu, mobile
+  menu) against them.
 
 ### Skip pages that already match
 
 Before building a page, check whether the downloaded theme already matches it:
 
 1. Find the page's template (`templates/index.json`, `templates/product.json`, ...)
-   and list its sections and blocks in order.
+   in the inventory's "Current layouts" and read its sections and blocks in order.
 2. Compare them with the Figma frame: same sections in the same order, same
    blocks and content, and layout settings (spacing, alignment, width, columns)
    that fit the design. Global tokens were already applied in step 3, so judge
@@ -167,15 +272,33 @@ or you can't tell, build the page as below.
 ### Build the page
 
 List the page's sections from top to bottom and match each one to an existing
-section + blocks:
+section + blocks from the inventory. Look at the presets first: a section's
+presets (for example "Image with text", "FAQ", "Products carousel") are often an
+exact match for a Figma section. Write the mapping out like this:
 
 | Figma section | Theme section / blocks | Gaps |
 |---|---|---|
 | Hero with heading + 2 buttons | `hero` → `text`, `button` ×2 | none |
-| 3-column USP row | `section` → `group` ×3 → `icon`, `text` | icon set differs |
+| 3-column USP row | `section` → `cc-icon-text-list` → `_cc-icon-text-item` ×3 | icon set differs |
 
 - Prefer building the layout in `templates/*.json` with existing sections and blocks
-  and their settings (spacing, alignment, colour, width).
+  and their settings (spacing, alignment, colour, width). Copy the block structure
+  of the matching preset from the section's schema, then change settings.
+- Translate Figma auto layout directly: direction → `content_direction`, gap →
+  `gap` / `gap_mobile`, padding → `padding-block-*` / `padding-inline-*`,
+  alignment → `horizontal_alignment` / `vertical_alignment`, fill/hug/fixed width →
+  group `width` `fill` / `fit-content` / `custom` %. Section padding is 0–100px and
+  has no mobile value: use the desktop value and list sections whose mobile
+  padding differs a lot.
+- Content edge to edge → `section_width: full-width`; content inside the page
+  grid → `page-width`.
+- Copy: use the real text from the design in block settings. If the design uses
+  lorem ipsum or obvious placeholder copy, keep the theme's default text and list
+  the section under "copy needed".
+- Text styles: use `type_preset` `h1`–`h6` / `paragraph` when the style matches a
+  global token; `custom` only for the extra styles listed in step 2.
+- Buttons: `style_class` `button` / `button-secondary` when they match the global
+  button tokens; `button-custom` only for one-off buttons.
 - Only create a new section, block, snippet or asset when no existing one can do
   it. Name it with a `cc-` prefix (`sections/cc-feature-banner.liquid`) and follow
   the `horizon-theme` skill when you do.
@@ -186,7 +309,30 @@ section + blocks:
   the link to `#` and list it in the report so the merchant can relink it later.
   Never invent a handle.
 - Mobile: compare the mobile frame and use the mobile-specific settings
-  (`*_mobile`) where they exist.
+  (`*_mobile`, `vertical_on_mobile`, `mobile_columns`, `carousel_on_mobile`,
+  `mobile_image`, group `mobile_order`, `show_on_desktop` / `show_on_mobile`)
+  where they exist. For sections without a mobile frame, follow the patterns of
+  the mobile frames that do exist (side padding, how cards stack, heading sizes),
+  and list those sections in the build log as "mobile inferred".
+- Validate each template JSON after editing (strip the leading `/* */` comment
+  first, as with `settings_data.json`). Check that every block `type` is allowed
+  by its parent's schema, and that `block_order` lists every block.
+
+### Check the page
+
+When the page is built, check it before moving on:
+
+1. If the project has a theme ID (`.twin-dev.json`), push the changed files to
+   it as the `shopify-theme-deploy` skill describes. Otherwise run
+   `shopify theme dev` and use the local preview URL.
+2. With a browser tool, screenshot the page at 1440px and 390px and compare it
+   section by section with the Figma screenshots: order, spacing, sizes, colours,
+   alignment, image crops.
+3. Fix what's fixable with settings and check again. Stop after three rounds on
+   one page and list what's left.
+
+Without a browser tool, say so, mark the page `built` (not checked) in the build
+log, and leave the comparison to `qa-checker`.
 
 ## 5. Menus
 
@@ -198,19 +344,34 @@ menus as that skill's step 4 describes.
 
 ## 6. Assets
 
-- Use `download_assets` for images and icons the theme needs.
+- Use `download_assets` for images and icons the theme needs. Save them in a
+  folder outside the theme (the scratchpad, or `figma-assets/` in the project
+  root, which Shopify CLI doesn't upload), named after the section they belong
+  to: `home-hero-desktop.jpg`, `home-hero-mobile.jpg`.
 - Product and content photos belong in Shopify Files or on resources, not in
-  `assets/`. Tell the user which images to upload and where they're used.
-- SVG icons that become part of the theme UI can go in `assets/` or a snippet.
-  Mark them `aria-hidden="true"` when decorative.
+  `assets/`. Once a file is in Shopify Files, reference it in template JSON as
+  `"image": "shopify://shop_images/<filename>"`. Until then, leave the image
+  setting empty (the theme shows a placeholder) and list the file, its section
+  and setting so the merchant or developer can upload it.
+- Export photos at 2× their largest displayed size, as JPG or WebP. Logos and
+  icons should be SVG.
+- Logo and favicon are global settings (`logo`, `logo_inverse`, `favicon`) and
+  need uploading the same way.
+- Before adding an icon, check the built-in icon set (the `icon` and `button`
+  blocks' `icon` options, such as `truck`, `return`, `lock`). Only add a custom SVG
+  when none fits; theme UI icons can go in `assets/cc-icon-*.svg` or a `cc-`
+  snippet. Mark them `aria-hidden="true"` when decorative.
 
 ## 7. Report
 
 Finish with:
 
-- the token sheet as applied;
+- the token sheet as applied, with clamped, rounded and unsupported values;
 - the section mapping, with what you built and what still needs the merchant
   (images, copy, links, products);
+- sections whose mobile layout was inferred because there's no mobile frame,
+  for the client to confirm;
+- images to upload, each with its file name, section and setting;
 - the **QA later** list: pages skipped because the theme already matched, each
   with its template, Figma frame and how it was checked. Pass this list to the
   `qa-checker` agent with the Figma link so it checks those pages 1:1;
