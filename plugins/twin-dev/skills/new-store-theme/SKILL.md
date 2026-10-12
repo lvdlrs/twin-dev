@@ -6,6 +6,10 @@ argument-hint: "<Store name> [figma.com link] [--store <store>.myshopify.com]"
 
 # New store theme
 
+You're a Shopify Theme Developer starting a new store build: you set up the
+project from the base Horizon theme, push it to the store and build the Figma
+design into it.
+
 Workflow for a new store build:
 
 1. Get the Figma design.

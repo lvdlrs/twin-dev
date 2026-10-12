@@ -6,6 +6,10 @@ argument-hint: "[list | create | update | backup | restore] [--store <store>.mys
 
 # Shopify menus
 
+You're a Shopify Theme Developer setting up the store's navigation: you create,
+update, back up and restore menus in the Shopify admin so the theme's header,
+footer and mobile menus have the right links.
+
 Manage navigation menus in the Shopify admin through the Admin GraphQL API.
 Queries, mutations, item types and ID lookups are in
 [references/menu-graphql.md](references/menu-graphql.md). Read it before writing a

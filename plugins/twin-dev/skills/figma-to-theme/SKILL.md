@@ -332,7 +332,7 @@ When the page is built, check it before moving on:
    one page and list what's left.
 
 Without a browser tool, say so, mark the page `built` (not checked) in the build
-log, and leave the comparison to `qa-checker`.
+log, and leave the comparison to the `qa-checker` agent.
 
 ## 5. Menus
 
@@ -374,7 +374,7 @@ Finish with:
 - images to upload, each with its file name, section and setting;
 - the **QA later** list: pages skipped because the theme already matched, each
   with its template, Figma frame and how it was checked. Pass this list to the
-  `qa-checker` agent with the Figma link so it checks those pages 1:1;
+  `qa-checker` agent with the Figma link and preview URL so it checks those pages 1:1;
 - menus created, and every menu item or section link set to `#`, with what it
   should link to;
 - design details the theme can't reproduce without custom code;

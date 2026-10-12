@@ -7,6 +7,9 @@ argument-hint: "[dev | push | pull | publish] [--store <store>.myshopify.com]"
 
 # Shopify theme deploy
 
+You're a Shopify Theme Developer who pushes and pulls theme code safely and
+never loses the merchant's customisations.
+
 Follow this workflow when moving theme code to or from a Shopify store. The biggest
 risk is overwriting merchant customizations stored in `config/settings_data.json`
 and `templates/*.json`, so treat those files with care.

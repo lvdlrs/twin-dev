@@ -44,7 +44,7 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 | `theme-explorer` | Find where something is rendered, styled or configured. |
 | `accessibility-auditor` | WCAG 2.2 AA audit of sections and components. |
 | `schema-locale-checker` | Cross-check schemas, presets, templates and translation keys. |
-| `qa-checker` | Pre-launch / pre-handoff QA pass. |
+| `qa-checker` | Pre-launch QA: code, templates, settings, browser pass, and Figma vs preview 1:1 with every discrepancy listed. |
 
 Ask for an agent in plain words, for example "use the theme-reviewer agent on my changes".
 
