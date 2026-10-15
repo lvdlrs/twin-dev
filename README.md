@@ -72,6 +72,29 @@ Figma link, the theme ID, the storefront password), it finishes what it can and
 returns a **Need from you** list: ask the user for each item, save the domain,
 theme ID and Figma link to `.twin-dev.json`, and run it again.
 
+## Failure log
+
+Every skill and agent records what went wrong in one shared file on each computer:
+`~/.claude/twin-dev/failures.md` (outside the plugin, so updates don't wipe it).
+Before starting, each one reads its own past entries and reuses the recorded
+fixes instead of repeating a failed approach.
+
+```markdown
+## 2026-10-15 · shopify-menus · acme-coffee.myshopify.com
+- **Tried:** shopify store execute menuCreate
+- **Failed:** "Access denied for menuCreate field"
+- **Cause:** CLI app missing write_online_store_navigation scope
+- **Fix:** re-ran `shopify store auth` with the scope
+```
+
+Failures are tool, command or API errors, failed checks, retries, wrong
+assumptions and anything the user corrected. Issues an agent finds in the theme
+are findings, not failures. `theme-explorer` can't write files, so it lists its
+failures in its report for the main session to log. Secrets and customer data are
+never logged.
+
+When an entry keeps coming back, move the fix into the skill or agent itself.
+
 ## Add more
 
 - Skill: `plugins/twin-dev/skills/<name>/SKILL.md` with `name` and `description` frontmatter.

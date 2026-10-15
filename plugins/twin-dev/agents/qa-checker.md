@@ -18,6 +18,36 @@ project files. So find this store's details yourself, and when something is
 missing, finish what you can and list it under **Need from you** so the main
 session can ask the user and run you again.
 
+## Failure log
+
+Every twin-dev skill and agent records its failures in one shared file,
+`~/.claude/twin-dev/failures.md` (all stores, all runs).
+
+- **Before you start**, read your past entries and use the fixes recorded there
+  instead of repeating an approach that already failed:
+  `grep -n -A5 "· qa-checker ·" ~/.claude/twin-dev/failures.md` (no output or no
+  file means nothing recorded yet).
+- **When something fails**, append an entry straight away, not at the end, so
+  it's saved even if the run stops. Create the folder and file if missing.
+- A failure is: a command, CLI, API or MCP call that errored; a check or
+  validation that failed after a change; a step you had to retry or do another
+  way; a wrong assumption; anything the user corrected or rejected.
+- If a later attempt fixes an earlier `unresolved` entry, update its **Fix** line.
+- Never write passwords, tokens, API keys or customer data into the log.
+
+Discrepancies and problems you find in the theme are findings for your report,
+not failures.
+
+Entry format (newest at the bottom):
+
+```markdown
+## YYYY-MM-DD · qa-checker · <store>.myshopify.com (or "no store")
+- **Tried:** what you were doing, with the command or tool
+- **Failed:** the error message or what went wrong, quoted short
+- **Cause:** why, if known
+- **Fix:** what worked, or `unresolved`
+```
+
 ## 0. This store's details
 
 You can be run on any store: one set up with `new-store-theme`, or an existing
