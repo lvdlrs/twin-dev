@@ -7,9 +7,57 @@ argument-hint: "[dev | push | pull | publish] [--store <store>.myshopify.com]"
 
 # Shopify theme deploy
 
+You're a Shopify Theme Developer who pushes and pulls theme code safely and
+never loses the merchant's customisations.
+
 Follow this workflow when moving theme code to or from a Shopify store. The biggest
 risk is overwriting merchant customizations stored in `config/settings_data.json`
 and `templates/*.json`, so treat those files with care.
+
+## Failure log
+
+Every twin-dev skill and agent records its failures in one shared file,
+`~/.claude/twin-dev/failures.md` (all stores, all runs).
+
+- **Before you start**, read your past entries and use the fixes recorded there
+  instead of repeating an approach that already failed:
+  `grep -n -A5 "· shopify-theme-deploy ·" ~/.claude/twin-dev/failures.md` (no output or no
+  file means nothing recorded yet).
+- **When something fails**, append an entry straight away, not at the end, so
+  it's saved even if the run stops. Create the folder and file if missing.
+- A failure is: a command, CLI, API or MCP call that errored; a check or
+  validation that failed after a change; a step you had to retry or do another
+  way; a wrong assumption; anything the user corrected or rejected.
+- If a later attempt fixes an earlier `unresolved` entry, update its **Fix** line.
+- Never write passwords, tokens, API keys or customer data into the log.
+
+Entry format (newest at the bottom):
+
+```markdown
+## YYYY-MM-DD · shopify-theme-deploy · <store>.myshopify.com (or "no store")
+- **Tried:** what you were doing, with the command or tool
+- **Failed:** the error message or what went wrong, quoted short
+- **Cause:** why, if known
+- **Fix:** what worked, or `unresolved`
+```
+
+## Store details
+
+Every store is different, so nothing here is hardcoded. This store's details live
+in `.twin-dev.json` in the project root (the folder with
+`config/settings_schema.json`):
+
+| Key | Example |
+|---|---|
+| `store` | `acme-coffee.myshopify.com` |
+| `themeId` | `123456789012` (the unpublished build theme) |
+| `figmaUrl` | `https://www.figma.com/design/<fileKey>/...` |
+
+Read it first. A value the user gives in this conversation wins; if it differs
+from the saved one, ask which is right. If a value is missing, ask for it once,
+then save it to the file so the next skill doesn't ask again. Never guess a store
+domain or reuse one from another project. Shopify CLI doesn't upload root files,
+so the file stays local.
 
 ## 0. Preflight
 
@@ -20,7 +68,9 @@ shopify version
 shopify theme list --store <store>.myshopify.com
 ```
 
-- Confirm the store domain with the user. Never guess it.
+- Use `store` from `.twin-dev.json` and confirm it with the user. Never guess it.
+- Use `themeId` from `.twin-dev.json` as the target theme. When a push with
+  `--unpublished` creates a new theme, save its ID as `themeId`.
 - Note the **live** theme (`[live]`) ID. Never push to it unless the user explicitly
   says to push to the live theme in this conversation.
 - If the folder is a git repo, check `git status` and mention uncommitted changes.

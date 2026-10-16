@@ -6,6 +6,10 @@ argument-hint: "[list | create | update | backup | restore] [--store <store>.mys
 
 # Shopify menus
 
+You're a Shopify Theme Developer setting up the store's navigation: you create,
+update, back up and restore menus in the Shopify admin so the theme's header,
+footer and mobile menus have the right links.
+
 Manage navigation menus in the Shopify admin through the Admin GraphQL API.
 Queries, mutations, item types and ID lookups are in
 [references/menu-graphql.md](references/menu-graphql.md). Read it before writing a
@@ -14,9 +18,56 @@ request.
 Put query and variables files in your scratchpad or a temp directory, never in the
 theme folder.
 
+## Failure log
+
+Every twin-dev skill and agent records its failures in one shared file,
+`~/.claude/twin-dev/failures.md` (all stores, all runs).
+
+- **Before you start**, read your past entries and use the fixes recorded there
+  instead of repeating an approach that already failed:
+  `grep -n -A5 "· shopify-menus ·" ~/.claude/twin-dev/failures.md` (no output or no
+  file means nothing recorded yet).
+- **When something fails**, append an entry straight away, not at the end, so
+  it's saved even if the run stops. Create the folder and file if missing.
+- A failure is: a command, CLI, API or MCP call that errored; a check or
+  validation that failed after a change; a step you had to retry or do another
+  way; a wrong assumption; anything the user corrected or rejected.
+- If a later attempt fixes an earlier `unresolved` entry, update its **Fix** line.
+- Never write passwords, tokens, API keys or customer data into the log.
+
+Entry format (newest at the bottom):
+
+```markdown
+## YYYY-MM-DD · shopify-menus · <store>.myshopify.com (or "no store")
+- **Tried:** what you were doing, with the command or tool
+- **Failed:** the error message or what went wrong, quoted short
+- **Cause:** why, if known
+- **Fix:** what worked, or `unresolved`
+```
+
+## Store details
+
+Every store is different, so nothing here is hardcoded. This store's details live
+in `.twin-dev.json` in the project root (the folder with
+`config/settings_schema.json`):
+
+| Key | Example |
+|---|---|
+| `store` | `acme-coffee.myshopify.com` |
+| `themeId` | `123456789012` (the unpublished build theme) |
+| `figmaUrl` | `https://www.figma.com/design/<fileKey>/...` |
+
+Read it first. A value the user gives in this conversation wins; if it differs
+from the saved one, ask which is right. If a value is missing, ask for it once,
+then save it to the file so the next skill doesn't ask again. Never guess a store
+domain or reuse one from another project. Shopify CLI doesn't upload root files,
+so the file stays local.
+
 ## 0. Access
 
-Confirm the store domain (`<store>.myshopify.com`) with the user. Never guess it.
+Use `store` from `.twin-dev.json` and confirm it with the user before the first
+change. If you're not in a project folder or it's missing, ask for the
+`<store>.myshopify.com` domain. Never guess it.
 
 ### Default: Shopify CLI store commands
 
