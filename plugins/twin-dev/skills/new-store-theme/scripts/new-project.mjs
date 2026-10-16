@@ -18,9 +18,12 @@
 //
 // Writes .twin-dev.json (this store's details: store, themeId, figmaUrl, ...)
 // into the new folder.
-// Prints JSON: { storeName, version, themeName, folderName, folderPath, baseTheme, store, figmaUrl }.
+// Prints JSON: { storeName, version, themeName, folderName, folderPath, baseTheme, baseCommit, store, figmaUrl }.
+// `baseCommit` is the base theme's git commit (null if it isn't a git repo), so the
+// section library can compare this store's cc- files with the exact base it came from.
 // Exits 1 if the base theme is invalid, the name can't fit, or the folder exists.
 
+import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 
@@ -52,7 +55,8 @@ const store = normaliseDomain(args.domain);
 const figmaUrl = (args.figma || "").trim() || null;
 if (figmaUrl && !/^https:\/\/(www\.)?figma\.com\//.test(figmaUrl)) fail(`Not a Figma link: ${figmaUrl}`, 2);
 
-const plan = { storeName, version, themeName, folderName, folderPath, baseTheme, store, figmaUrl };
+const baseCommit = gitHead(baseTheme);
+const plan = { storeName, version, themeName, folderName, folderPath, baseTheme, baseCommit, store, figmaUrl };
 
 if (!args["dry-run"]) {
   cpSync(baseTheme, folderPath, {
@@ -98,6 +102,14 @@ function safeFolderName(name) {
     .replace(/\s+/g, " ")
     .trim()
     .replace(/[. ]+$/, "");
+}
+
+function gitHead(cwd) {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  } catch {
+    return null;
+  }
 }
 
 function readThemeVersion(path) {

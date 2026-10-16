@@ -7,7 +7,7 @@
     {
       "name": "twin-dev",
       "source": "./plugins/twin-dev",
-      "description": "Shopify Horizon theme skills and agents: conventions, new store setup, deploy, Figma-to-theme, admin menus and files, review, accessibility, schema/locale and QA checks."
+      "description": "Shopify Horizon theme skills and agents: conventions, new store setup, deploy, Figma-to-theme, admin pages, menus, files and store auth, section library, Shopify Dev MCP, review, accessibility, schema/locale and QA checks."
     }
   ]
 }

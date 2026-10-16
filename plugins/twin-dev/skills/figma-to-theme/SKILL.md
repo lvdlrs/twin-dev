@@ -260,6 +260,16 @@ Work through the Figma pages one at a time, in this order: header and footer,
 home, product, collection, then content pages. Header, footer and the product
 card appear on every page, so match them first.
 
+Before building a new `cc-` section or block for a design component, search past
+stores with the `section-library` skill and reuse or port the closest match. When
+the page is built, record its `cc-` files there (`library.mjs add` and a `note`
+per new or changed entry).
+
+Content pages use the template names the `shopify-pages` skill chose, saved in
+`.twin-dev.json` under `pages` (`templateSuffix: "about"` →
+`templates/page.about.json`). Run that skill before building content pages, and
+never create a page template under a different name.
+
 Keep a build log at `figma-build.md` in the project root: the inventory table,
 then one row per page with its status (`todo`, `building`, `built`, `QA later`),
 template, Figma frame and open questions. Update it after each page, so the work
@@ -368,9 +378,10 @@ log, and leave the comparison to the `qa-checker` agent.
 ## 5. Menus
 
 Read every menu in the design: header nav, mega menu, mobile drawer, footer
-columns, and utility or legal links. Create each one in the Shopify admin with the
+columns, and utility or legal links. First run the `shopify-pages` skill, so every
+page the menus link to exists. Then create each menu in the Shopify admin with the
 `shopify-menus` skill. That skill names them `Momentum - <Menu name>` and links
-missing pages to `#`. Then point the header and footer menu settings at the new
+anything still missing (collections, products) to `#`. Then point the header and footer menu settings at the new
 menus as that skill's step 4 describes.
 
 ## 6. Assets

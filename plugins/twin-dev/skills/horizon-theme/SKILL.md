@@ -40,13 +40,29 @@ Entry format (newest at the bottom):
 - **Fix:** what worked, or `unresolved`
 ```
 
+## Shopify docs
+
+The plugin starts Shopify's Dev MCP server (`shopify-dev-mcp`). When you're
+unsure of a Liquid tag or filter, a schema setting type, an Admin GraphQL field
+or a theme feature, search its docs instead of working from memory:
+
+- `learn_shopify_api` first when a tool asks for it (it returns the context the
+  other tools need), then `search_docs_chunks` for docs and examples.
+- `validate_theme` on Liquid and theme JSON you write or port.
+- `validate` on Admin GraphQL operations (menus, pages, files).
+
+Tool names can change between versions; if these are gone, use the ones it
+lists. If it isn't connected, fall back to shopify.dev and say so.
+
 ## Before you edit
 
 1. Identify the Horizon version (`config/settings_schema.json` → `theme_info`).
    4.x uses `color_palette` + `palette_*` role settings; older versions use
    `color_schemes`. Don't mix the two.
 2. Search for an existing section, block, snippet, setting or CSS utility that
-   already owns the behaviour. Extend it instead of adding a new one.
+   already owns the behaviour. Extend it instead of adding a new one. Before a
+   new `cc-` section or block, also search past stores with the
+   `section-library` skill.
 3. Read every file involved: the Liquid file, its schema, the snippets it renders,
    locale keys it uses, and the JS module that drives it.
 4. Check whether a `schemas/` source folder exists. If it does, edit the source and
@@ -120,5 +136,6 @@ one live region per independently updated status; check RTL and zoom.
 1. Re-read changed Liquid, schema, locale, CSS and JS together and check that IDs,
    settings, refs, selectors and events agree.
 2. Validate any JSON you touched (schema blocks, templates, locales).
-3. Run `shopify theme check` and fix valid findings.
+3. Run `shopify theme check` and fix valid findings. Run the Dev MCP `validate_theme` tool on
+   the changed files too, if it's connected.
 4. Tell the user which templates to preview and any check you could not run.

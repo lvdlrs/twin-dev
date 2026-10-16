@@ -34,14 +34,17 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 | `/twin-dev:shopify-theme-deploy` | Safe preview / push / pull / publish with Shopify CLI. Manual only. |
 | `/twin-dev:new-store-theme` | Start a store build: copy the base Horizon theme into a new project folder, name it `<Store> x Hv<version>(Momentum in progress...)`, push it unpublished, then build the Figma design. |
 | `/twin-dev:figma-to-theme` | Pull colours, type, spacing and layouts from Figma into theme settings and sections. |
+| `/twin-dev:shopify-store-auth` | Connect Shopify CLI to a store: check the CLI, log in for theme pushes, authorize menu, page and file scopes, and verify. Run it before the first build on each store. |
 | `/twin-dev:shopify-files` | Download images from Figma, upload them to Shopify Files with alt text, and set them in the theme's image settings. |
+| `/twin-dev:shopify-pages` | Create the pages the design links to (plus Visit the Store, All Looks, All Brands), match their templates to the live theme's names, and add missing templates to live as copies of its `page.json`. Run before `shopify-menus`. |
+| `/twin-dev:section-library` | Search and reuse `cc-` sections from past stores (client-customized copies and older base versions included), port them to this project's base, and record new builds. Run `library.mjs scan` once to index past projects. |
 | `/twin-dev:shopify-menus` | Create, update, back up and restore navigation menus in the Shopify admin (via `shopify store execute`). |
 
 ### Agents
 
 | Agent | Use |
 |---|---|
-| `store-builder` | Build or continue a store from Figma end to end: project folder, unpublished theme, tokens, sections, menus, images. Run `qa-checker` after it. |
+| `store-builder` | Build or continue a store from Figma end to end, without asking questions: project folder, unpublished theme, tokens, sections, menus, images. Saves its progress and decisions in `.twin-dev.json` and resumes from there. Run `qa-checker` after it. |
 | `theme-reviewer` | Review changed Liquid/schema/CSS/JS before pushing. |
 | `theme-explorer` | Find where something is rendered, styled or configured. |
 | `accessibility-auditor` | WCAG 2.2 AA audit of sections and components. |
@@ -52,6 +55,17 @@ Ask for an agent in plain words, for example "use the theme-reviewer agent on my
 
 ```
 Use the store-builder agent: store "Acme Coffee Co", Figma <link>, store acme-coffee.myshopify.com
+```
+
+For a new store, run `/twin-dev:shopify-store-auth <store>.myshopify.com` first
+so the build doesn't stop for a login.
+
+If a run ends with steps blocked (for example it needs store auth), fix what the
+report lists and run it again. It picks up from the first unfinished
+step and keeps its earlier decisions, unless your message overrides them:
+
+```
+Use the store-builder agent: continue "Acme Coffee Co". Headings use Inter.
 ```
 
 ## Per-store details
@@ -77,6 +91,34 @@ Agents can't ask questions mid-run. When `qa-checker` is missing something (a
 Figma link, the theme ID, the storefront password), it finishes what it can and
 returns a **Need from you** list: ask the user for each item, save the domain,
 theme ID and Figma link to `.twin-dev.json`, and run it again.
+
+## Section library
+
+Every `cc-` section and block from past store projects, indexed so new builds
+reuse them. Each entry is marked `base` (same as the base theme at the version
+that store started from), `customized` (a base section changed for that client)
+or `custom` (built only for that client), with the store's base version.
+
+Index past projects once (needs `TWIN_DEV_BASE_THEME` pointing at the base
+theme's git repo, so each store is compared with the right base version):
+
+```
+node plugins/twin-dev/skills/section-library/scripts/library.mjs scan
+```
+
+After that, `figma-to-theme` and `store-builder` search it before building a
+section and add each finished project to it. The library is saved in
+`~/.claude/twin-dev/library`; set `TWIN_DEV_LIBRARY_DIR` to a shared folder to
+share it with the team. New projects record the base commit they were copied
+from (`baseCommit` in `.twin-dev.json`).
+
+## Shopify docs
+
+The plugin starts Shopify's Dev MCP server (`shopify-dev-mcp`, needs Node.js 18+)
+for docs search and Liquid, theme and GraphQL validation. Check it's connected
+with `/mcp`. The config in `plugins/twin-dev/.mcp.json` uses `cmd /c npx` for
+Windows; on macOS or Linux change it to `"command": "npx"` with
+`["-y", "@shopify/dev-mcp@latest"]`.
 
 ## Failure log
 

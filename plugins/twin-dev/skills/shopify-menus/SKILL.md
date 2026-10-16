@@ -141,7 +141,10 @@ a Figma frame (use the Figma MCP tools to read the nav), or another menu.
 1. Resolve every link to a type and target. Prefer resource types (`COLLECTION`,
    `PAGE`, `PRODUCT`, `BLOG`, ...) over `HTTP` so links survive handle changes.
    Use `HTTP` only for external links, anchors and paths with no resource.
-2. Look up resource IDs by handle with the queries in the reference. When a
+2. For pages, run the `shopify-pages` skill first, so the pages the menu links
+   to exist. Use the page IDs saved in `.twin-dev.json` under `pages`, keyed by
+   handle; look up anything else by handle.
+   Look up resource IDs by handle with the queries in the reference. When a
    collection, page, product or blog doesn't exist yet, keep the item and link it
    to `#` (`{ "type": "HTTP", "url": "#" }`). Mark it in the plan so the merchant
    knows to relink it later. Don't invent IDs, and don't create products,
