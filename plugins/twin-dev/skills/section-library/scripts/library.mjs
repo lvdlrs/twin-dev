@@ -10,7 +10,7 @@
 //
 //   scan     Index every project folder in the projects folder (a folder with
 //            config/settings_schema.json). Defaults to $TWIN_DEV_PROJECTS_DIR, then
-//            the Capital Commerce Projects folder.
+//            `projectsDir` in ~/.claude/twin-dev/config.json.
 //   add      Index one project folder (run after a build).
 //   search   Rank entries by the words, matched against file, name, presets,
 //            settings, blocks, store and notes.
@@ -33,7 +33,7 @@ import { execFileSync } from "node:child_process";
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 
-const DEFAULT_PROJECTS_DIR = "D:/Lenmuel Del Rosario/Documents/Employer/Capital Commerce/Projects";
+const CONFIG_PATH = join(homedir(), ".claude", "twin-dev", "config.json");
 const CC_DIRS = ["sections", "blocks", "snippets", "assets"];
 
 const [command, ...rest] = process.argv.slice(2);
@@ -43,7 +43,7 @@ const indexPath = join(libraryDir, "index.json");
 
 switch (command) {
   case "scan": {
-    const projectsDir = resolve(args.projects || process.env.TWIN_DEV_PROJECTS_DIR || DEFAULT_PROJECTS_DIR);
+    const projectsDir = resolveProjectsDir(args.projects);
     if (!existsSync(projectsDir)) fail(`Projects folder doesn't exist: ${projectsDir}`);
     const folders = readdirSync(projectsDir, { withFileTypes: true })
       .filter((d) => d.isDirectory())
@@ -377,6 +377,14 @@ function parseArgs(argv) {
     else positional.push(argv[i]);
   }
   return { args: out, words: positional };
+}
+
+// --flag, then $TWIN_DEV_PROJECTS_DIR, then `projectsDir` in ~/.claude/twin-dev/config.json.
+function resolveProjectsDir(flag) {
+  let dir = flag || process.env.TWIN_DEV_PROJECTS_DIR;
+  if (!dir && existsSync(CONFIG_PATH)) dir = JSON.parse(readFileSync(CONFIG_PATH, "utf8")).projectsDir;
+  if (!dir) fail(`No projects folder. Pass --projects <dir>, set TWIN_DEV_PROJECTS_DIR, or add {"projectsDir": "<dir>"} to ${CONFIG_PATH}.`, 2);
+  return resolve(dir);
 }
 
 function fail(message, code = 1) {

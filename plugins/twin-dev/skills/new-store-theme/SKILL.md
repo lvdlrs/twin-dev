@@ -55,7 +55,7 @@ Collect these before you start. Ask for anything that's missing; never guess it.
 | Figma link | `figma.com/design/...`, this store's design. It can come later, but step 4 needs it. |
 | Base theme folder | `$TWIN_DEV_BASE_THEME`, or ask. Suggest setting the env var so you don't have to ask next time. |
 | Store domain | `<store>.myshopify.com`, needed for the push. |
-| Projects folder | Always `D:\Lenmuel Del Rosario\Documents\Employer\Capital Commerce\Projects` (the script's default). `$TWIN_DEV_PROJECTS_DIR` or `--dest` overrides it. Don't ask. |
+| Projects folder | `--dest`, else `$TWIN_DEV_PROJECTS_DIR`, else `projectsDir` in `~/.claude/twin-dev/config.json`. Don't ask unless the script says none is set; then ask once and save the answer to that config file so it's remembered on this computer. |
 
 ## 1. Update the base theme
 
@@ -93,9 +93,8 @@ The script:
 - builds the **folder name** `<Store> x Horizon <version>` (for example
   `Acme Coffee Co x Horizon 4.2.0`), keeping the store name as written minus
   characters Windows doesn't allow in folder names;
-- puts it in the Projects folder
-  (`D:\Lenmuel Del Rosario\Documents\Employer\Capital Commerce\Projects`)
-  unless `$TWIN_DEV_PROJECTS_DIR` or `--dest <dir>` says otherwise;
+- puts it in the Projects folder (`--dest <dir>`, else `$TWIN_DEV_PROJECTS_DIR`,
+  else `projectsDir` in `~/.claude/twin-dev/config.json`);
 - stops if that folder already exists. Never delete or overwrite an existing
   project folder: tell the user and ask whether to work in the existing folder
   or use a different store name.

@@ -9,7 +9,7 @@
 //   --store    Store / brand name as the client writes it (required)
 //   --base     Base theme folder. Defaults to $TWIN_DEV_BASE_THEME.
 //   --dest     Parent directory for the new folder. Defaults to $TWIN_DEV_PROJECTS_DIR,
-//              then the Capital Commerce Projects folder (DEFAULT_PROJECTS_DIR).
+//              then `projectsDir` in ~/.claude/twin-dev/config.json.
 //   --short    Abbreviation to use when the full theme name is over 50 characters.
 //              Defaults to the store name's initials.
 //   --domain   The store's <store>.myshopify.com domain, saved as `store`.
@@ -25,11 +25,12 @@
 
 import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
 const MAX_THEME_NAME = 50;
 const SUFFIX = "(Momentum in progress...)";
-const DEFAULT_PROJECTS_DIR = "D:/Lenmuel Del Rosario/Documents/Employer/Capital Commerce/Projects";
+const CONFIG_PATH = join(homedir(), ".claude", "twin-dev", "config.json");
 const SKIP = new Set([".git", "node_modules", ".shopify", ".DS_Store", "Thumbs.db", ".twin-dev.json"]);
 
 const args = parseArgs(process.argv.slice(2));
@@ -46,7 +47,7 @@ const version = readThemeVersion(schemaPath);
 
 const themeName = buildThemeName(storeName, version, args.short);
 const folderName = `${safeFolderName(storeName)} x Horizon ${version}`;
-const projectsDir = resolve(args.dest || process.env.TWIN_DEV_PROJECTS_DIR || DEFAULT_PROJECTS_DIR);
+const projectsDir = resolveProjectsDir(args.dest);
 if (!existsSync(projectsDir)) fail(`Projects folder doesn't exist: ${projectsDir}`);
 const folderPath = join(projectsDir, folderName);
 if (existsSync(folderPath)) fail(`Folder already exists: ${folderPath}`);
@@ -133,6 +134,14 @@ function parseArgs(argv) {
     else out[key] = argv[++i];
   }
   return out;
+}
+
+// --dest, then $TWIN_DEV_PROJECTS_DIR, then `projectsDir` in ~/.claude/twin-dev/config.json.
+function resolveProjectsDir(flag) {
+  let dir = flag || process.env.TWIN_DEV_PROJECTS_DIR;
+  if (!dir && existsSync(CONFIG_PATH)) dir = JSON.parse(readFileSync(CONFIG_PATH, "utf8")).projectsDir;
+  if (!dir) fail(`No projects folder. Pass --dest <dir>, set TWIN_DEV_PROJECTS_DIR, or add {"projectsDir": "<dir>"} to ${CONFIG_PATH}.`, 2);
+  return resolve(dir);
 }
 
 function fail(message, code = 1) {
