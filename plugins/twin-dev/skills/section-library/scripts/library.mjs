@@ -15,7 +15,8 @@
 //
 //   The base theme is --base, else the project's `baseTheme` in .twin-dev.json (when
 //   that folder exists on this computer), else $TWIN_DEV_BASE_THEME, else `baseTheme`
-//   in ~/.claude/twin-dev/config.json.
+//   in ~/.claude/twin-dev/config.json, else the base theme clone that new-project.mjs
+//   keeps in ~/.claude/twin-dev/base-theme (cloned here if it's missing).
 //
 //   search   Rank entries by the words, matched against file, name, presets,
 //            settings, blocks, store and notes.
@@ -33,15 +34,19 @@
 //   custom      not in the base theme (built for this store)
 // `baseUpdated` is true when the base theme's file has changed since that version.
 
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 
 const CONFIG_PATH = join(homedir(), ".claude", "twin-dev", "config.json");
+// Same repo and clone folder as new-project.mjs.
+const BASE_THEME_REPO = "https://github.com/lvdlrs/capital-horizon-theme.git";
+const BASE_THEME_CLONE = join(homedir(), ".claude", "twin-dev", "base-theme");
 const CC_DIRS = ["sections", "blocks", "snippets", "assets"];
 // Opened base themes by folder, so a scan reads each one's git history once.
 const bases = new Map();
+let cloneFailed = false;
 
 const [command, ...rest] = process.argv.slice(2);
 const { args, words } = parseArgs(rest);
@@ -181,10 +186,27 @@ function baseFor(folder) {
   const root = args.base
     || (own && existsSync(own) ? own : null)
     || process.env.TWIN_DEV_BASE_THEME
-    || readConfig().baseTheme;
+    || readConfig().baseTheme
+    || baseClone();
   const key = root ? resolve(root) : "";
   if (!bases.has(key)) bases.set(key, openBase(key));
   return bases.get(key);
+}
+
+// The managed base theme clone, cloned once if it's missing. Null if cloning fails.
+function baseClone() {
+  if (existsSync(join(BASE_THEME_CLONE, ".git"))) return BASE_THEME_CLONE;
+  if (cloneFailed) return null;
+  const repo = readConfig().baseThemeRepo || BASE_THEME_REPO;
+  console.error(`Cloning the base theme from ${repo} into ${BASE_THEME_CLONE}`);
+  try {
+    execFileSync("git", ["clone", repo, BASE_THEME_CLONE], { stdio: ["ignore", 2, 2] });
+    return BASE_THEME_CLONE;
+  } catch {
+    rmSync(BASE_THEME_CLONE, { recursive: true, force: true });
+    cloneFailed = true;
+    return null;
+  }
 }
 
 function openBase(root) {

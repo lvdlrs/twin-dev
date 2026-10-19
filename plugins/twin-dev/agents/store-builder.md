@@ -65,7 +65,7 @@ Use the first source that has a value: your task, then the project's
 | Figma link | `figmaUrl` | Stop: nothing to build. This is the only input you can't work around. |
 | Store domain (`<store>.myshopify.com`) | `store` | Build locally. Mark `push`, `images` and `menus` as `blocked` with the input needed. |
 | Target theme ID | `themeId` (with `themeSource: "existing"`) | Push a new unpublished theme, and record as a decision that it won't get Horizon update notices. |
-| Base theme folder | `baseTheme` | `$TWIN_DEV_BASE_THEME`, then `baseTheme` in `~/.claude/twin-dev/config.json`. Only a new build needs it; if none is set, stop and report. |
+| Base theme folder | `baseTheme` | `$TWIN_DEV_BASE_THEME`, then `baseTheme` in `~/.claude/twin-dev/config.json`, then `new-project.mjs` clones the base theme repo itself. Only a new build needs it; if the clone fails, stop and report. |
 | Alt text | `build.answers.altText` | `user` (`needsAlt`). The user can say "Claude writes alt text" (`claude`). |
 | Abbreviation | — | The store's initials when the theme name is too long. |
 | Scope | `build.answers.scope` | Whole design. The user can limit it to pages or sections. |

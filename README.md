@@ -109,15 +109,22 @@ or `custom` (built only for that client), with the store's base version.
 
 Index past projects once. It needs the base theme's git repo so each store is
 compared with the right base version: each project's `.twin-dev.json` records
-the `baseTheme` it was copied from, and the default for this computer is
-`baseTheme` in `~/.claude/twin-dev/config.json` (or `$TWIN_DEV_BASE_THEME`):
+the `baseTheme` it was copied from. Otherwise it uses `baseTheme` in
+`~/.claude/twin-dev/config.json` (or `$TWIN_DEV_BASE_THEME`), and with neither
+set it clones [capital-horizon-theme](https://github.com/lvdlrs/capital-horizon-theme)
+into `~/.claude/twin-dev/base-theme`. So on a new computer the config only needs
+the projects folder:
 
 ```json
 {
-  "projectsDir": "D:/path/to/Projects",
-  "baseTheme": "D:/path/to/capital-horizon-theme"
+  "projectsDir": "D:/path/to/Projects"
 }
 ```
+
+Add `"baseTheme": "<path>"` to use your own local copy of the base theme
+instead (for example while you're changing it), or `"baseThemeRepo": "<url>"`
+to clone a different repo. When the base theme moves to the organization repo,
+change `BASE_THEME_REPO` in `new-project.mjs` and `library.mjs`.
 
 Then:
 

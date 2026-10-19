@@ -8,7 +8,9 @@
 //
 //   --store    Store / brand name as the client writes it (required)
 //   --base     Base theme folder. Defaults to $TWIN_DEV_BASE_THEME, then `baseTheme` in
-//              ~/.claude/twin-dev/config.json.
+//              ~/.claude/twin-dev/config.json, then a clone of the base theme repo
+//              (`baseThemeRepo` in config.json, else BASE_THEME_REPO) kept in
+//              ~/.claude/twin-dev/base-theme: cloned on first use, pulled on each run.
 //   --dest     Parent directory for the new folder. Defaults to $TWIN_DEV_PROJECTS_DIR,
 //              then `projectsDir` in ~/.claude/twin-dev/config.json.
 //   --short    Abbreviation to use when the full theme name is over 50 characters.
@@ -29,13 +31,16 @@
 // Exits 1 if the base theme is invalid, the name can't fit, or the folder exists.
 
 import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
 const MAX_THEME_NAME = 50;
 const SUFFIX = "(Momentum in progress...)";
 const CONFIG_PATH = join(homedir(), ".claude", "twin-dev", "config.json");
+// Change this when the base theme moves to the organization repo.
+const BASE_THEME_REPO = "https://github.com/lvdlrs/capital-horizon-theme.git";
+const BASE_THEME_CLONE = join(homedir(), ".claude", "twin-dev", "base-theme");
 const SKIP = new Set([".git", "node_modules", ".shopify", ".DS_Store", "Thumbs.db", ".twin-dev.json"]);
 
 const args = parseArgs(process.argv.slice(2));
@@ -143,11 +148,35 @@ function parseArgs(argv) {
   return out;
 }
 
-// --base, then $TWIN_DEV_BASE_THEME, then `baseTheme` in ~/.claude/twin-dev/config.json.
+// --base, then $TWIN_DEV_BASE_THEME, then `baseTheme` in ~/.claude/twin-dev/config.json,
+// then the managed clone of the base theme repo.
 function resolveBaseTheme(flag) {
-  const dir = flag || process.env.TWIN_DEV_BASE_THEME || readConfig().baseTheme;
-  if (!dir) fail(`No base theme folder. Pass --base <path>, set TWIN_DEV_BASE_THEME, or add {"baseTheme": "<path>"} to ${CONFIG_PATH}.`, 2);
-  return resolve(dir);
+  const config = readConfig();
+  const dir = flag || process.env.TWIN_DEV_BASE_THEME || config.baseTheme;
+  if (dir) return resolve(dir);
+  return syncBaseClone(config.baseThemeRepo || BASE_THEME_REPO);
+}
+
+// Clone the repo into BASE_THEME_CLONE, or fast-forward it if it's already there.
+// Git output goes to stderr so stdout stays JSON.
+function syncBaseClone(repo) {
+  const git = (gitArgs) => execFileSync("git", gitArgs, { stdio: ["ignore", 2, 2] });
+  if (!existsSync(join(BASE_THEME_CLONE, ".git"))) {
+    console.error(`Cloning the base theme from ${repo} into ${BASE_THEME_CLONE}`);
+    try {
+      git(["clone", repo, BASE_THEME_CLONE]);
+    } catch {
+      rmSync(BASE_THEME_CLONE, { recursive: true, force: true });
+      fail(`Couldn't clone ${repo}. Check you have access to it, or pass --base <path>.`);
+    }
+  } else {
+    try {
+      git(["-C", BASE_THEME_CLONE, "pull", "--ff-only"]);
+    } catch {
+      console.error(`Couldn't update ${BASE_THEME_CLONE}; using it as it is.`);
+    }
+  }
+  return BASE_THEME_CLONE;
 }
 
 // --dest, then $TWIN_DEV_PROJECTS_DIR, then `projectsDir` in ~/.claude/twin-dev/config.json.
