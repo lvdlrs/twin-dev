@@ -14,6 +14,44 @@ Keep downloads and the manifest in a work folder outside the theme, for example
 the scratchpad or `<project>/../<project>-images/`. Never put them in the theme
 folder.
 
+## Failure log
+
+Every twin-dev skill and agent records its failures in one shared file,
+`~/.claude/twin-dev/failures.md` (all stores, all runs).
+
+- **Before you start**, read your past entries and use the fixes recorded there
+  instead of repeating an approach that already failed:
+  `grep -n -A5 "· shopify-files ·" ~/.claude/twin-dev/failures.md` (no output or no
+  file means nothing recorded yet).
+- **When something fails**, append an entry straight away, not at the end, so
+  it's saved even if the run stops. Create the folder and file if missing.
+- A failure is: a command, CLI, API or MCP call that errored; a check or
+  validation that failed after a change; a step you had to retry or do another
+  way; a wrong assumption; anything the user corrected or rejected.
+- If a later attempt fixes an earlier `unresolved` entry, update its **Fix** line.
+- A **gap** isn't an error: the instructions had no rule for something you
+  met, so you worked it out or the user told you what to do. Log it as a gap
+  entry (below), so `improve-skills` can turn it into a rule.
+- Never write passwords, tokens, API keys or customer data into the log.
+
+Entry format (newest at the bottom):
+
+```markdown
+## YYYY-MM-DD · shopify-files · <store>.myshopify.com (or "no store")
+- **Tried:** what you were doing, with the command or tool
+- **Failed:** the error message or what went wrong, quoted short
+- **Cause:** why, if known
+- **Fix:** what worked, or `unresolved`
+```
+
+Gap entry:
+
+```markdown
+## YYYY-MM-DD · shopify-files · gap · <store>.myshopify.com (or "no store")
+- **Missing:** what the instructions didn't cover
+- **Did:** what you did, or what the user said to do
+```
+
 ## 0. Access
 
 Confirm the store domain (`<store>.myshopify.com`) with the user. Never guess it.

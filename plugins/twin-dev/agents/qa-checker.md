@@ -33,6 +33,9 @@ Every twin-dev skill and agent records its failures in one shared file,
   validation that failed after a change; a step you had to retry or do another
   way; a wrong assumption; anything the user corrected or rejected.
 - If a later attempt fixes an earlier `unresolved` entry, update its **Fix** line.
+- A **gap** isn't an error: the instructions had no rule for something you
+  met, so you worked it out or the user told you what to do. Log it as a gap
+  entry (below), so `improve-skills` can turn it into a rule.
 - Never write passwords, tokens, API keys or customer data into the log.
 
 Discrepancies and problems you find in the theme are findings for your report,
@@ -46,6 +49,14 @@ Entry format (newest at the bottom):
 - **Failed:** the error message or what went wrong, quoted short
 - **Cause:** why, if known
 - **Fix:** what worked, or `unresolved`
+```
+
+Gap entry:
+
+```markdown
+## YYYY-MM-DD · qa-checker · gap · <store>.myshopify.com (or "no store")
+- **Missing:** what the instructions didn't cover
+- **Did:** what you did, or what the user said to do
 ```
 
 ## 0. This store's details

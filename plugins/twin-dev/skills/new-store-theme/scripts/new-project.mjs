@@ -4,7 +4,7 @@
 // Usage:
 //   node new-project.mjs --store "<Store name>" [--base <path>] [--dest <dir>]
 //                        [--short <abbr>] [--domain <store>.myshopify.com]
-//                        [--figma <figma.com link>] [--dry-run]
+//                        [--figma <figma.com link>] [--theme-id <id>] [--dry-run]
 //
 //   --store    Store / brand name as the client writes it (required)
 //   --base     Base theme folder. Defaults to $TWIN_DEV_BASE_THEME.
@@ -14,11 +14,15 @@
 //              Defaults to the store name's initials.
 //   --domain   The store's <store>.myshopify.com domain, saved as `store`.
 //   --figma    The store's Figma design link, saved as `figmaUrl`.
+//   --theme-id An existing theme to build into (for example Horizon added from the
+//              Theme Store, so it gets update notices), saved as `themeId` with
+//              `themeSource: "existing"`. Without it the theme is created later by
+//              pushing (`themeSource: "pushed"`).
 //   --dry-run  Print the plan without copying anything.
 //
 // Writes .twin-dev.json (this store's details: store, themeId, figmaUrl, ...)
 // into the new folder.
-// Prints JSON: { storeName, version, themeName, folderName, folderPath, baseTheme, baseCommit, store, figmaUrl }.
+// Prints JSON: { storeName, version, themeName, folderName, folderPath, baseTheme, baseCommit, store, figmaUrl, themeId, themeSource }.
 // `baseCommit` is the base theme's git commit (null if it isn't a git repo), so the
 // section library can compare this store's cc- files with the exact base it came from.
 // Exits 1 if the base theme is invalid, the name can't fit, or the folder exists.
@@ -56,8 +60,12 @@ const store = normaliseDomain(args.domain);
 const figmaUrl = (args.figma || "").trim() || null;
 if (figmaUrl && !/^https:\/\/(www\.)?figma\.com\//.test(figmaUrl)) fail(`Not a Figma link: ${figmaUrl}`, 2);
 
+const themeId = (args["theme-id"] || "").trim().replace(/^gid:\/\/shopify\/OnlineStoreTheme\//, "") || null;
+if (themeId && !/^\d+$/.test(themeId)) fail(`Pass the numeric theme ID, not: ${args["theme-id"]}`, 2);
+const themeSource = themeId ? "existing" : null;
+
 const baseCommit = gitHead(baseTheme);
-const plan = { storeName, version, themeName, folderName, folderPath, baseTheme, baseCommit, store, figmaUrl };
+const plan = { storeName, version, themeName, folderName, folderPath, baseTheme, baseCommit, store, figmaUrl, themeId, themeSource };
 
 if (!args["dry-run"]) {
   cpSync(baseTheme, folderPath, {
@@ -66,7 +74,7 @@ if (!args["dry-run"]) {
   });
   writeFileSync(
     join(folderPath, ".twin-dev.json"),
-    JSON.stringify({ ...plan, createdAt: new Date().toISOString(), themeId: null }, null, 2) + "\n",
+    JSON.stringify({ ...plan, createdAt: new Date().toISOString() }, null, 2) + "\n",
   );
 }
 

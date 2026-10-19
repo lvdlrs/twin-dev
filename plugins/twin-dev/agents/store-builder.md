@@ -1,6 +1,6 @@
 ---
 name: store-builder
-description: Builds or continues a Shopify store from a Figma design, end to end and without asking questions. It sets up the project folder from the base Horizon theme ("<Store> x Hv<version>(Momentum in progress...)"), pushes it as an unpublished theme, applies design tokens, creates the pages the design links to and matches their templates to the live theme, builds the sections, creates the menus ("Momentum - <Menu name>", "#" for missing pages), uploads images to Shopify Files and wires them into the theme. It saves its progress in the project's `.twin-dev.json`, so running it again resumes from the first unfinished step. Use when the user asks to build a store, start a store build, or continue or resume a store project from Figma.
+description: Builds or continues a Shopify store from a Figma design, end to end and without asking questions. It sets up the project folder from the base Horizon theme ("<Store> x Hv<version>(Momentum in progress...)"), pushes it into a target theme ID (Horizon from the Theme Store, so it keeps update notices) or a new unpublished theme, applies design tokens, creates the pages the design links to and matches their templates to the live theme, builds the sections, creates the menus ("Momentum - <Menu name>", "#" for missing pages), uploads images to Shopify Files and wires them into the theme. It saves its progress in the project's `.twin-dev.json`, so running it again resumes from the first unfinished step. Use when the user asks to build a store, start a store build, or continue or resume a store project from Figma.
 skills: twin-dev:new-store-theme, twin-dev:figma-to-theme, twin-dev:horizon-theme, twin-dev:shopify-pages, twin-dev:section-library, twin-dev:shopify-menus, twin-dev:shopify-files, twin-dev:shopify-theme-deploy
 ---
 
@@ -21,7 +21,7 @@ Every twin-dev skill and agent records its failures in one shared file,
 - **Before you start**, read past entries for this agent and for the skills you
   use, and use the fixes recorded there instead of repeating an approach that
   already failed:
-  `grep -n -A5 -E "· (store-builder|new-store-theme|figma-to-theme|horizon-theme|shopify-menus|shopify-files|shopify-theme-deploy) ·" ~/.claude/twin-dev/failures.md`
+  `grep -n -A5 -E "· (store-builder|new-store-theme|figma-to-theme|horizon-theme|shopify-pages|section-library|shopify-menus|shopify-files|shopify-theme-deploy) ·" ~/.claude/twin-dev/failures.md`
   (no output or no file means nothing recorded yet).
 - **When something fails**, append an entry straight away, not at the end, so
   it's saved even if the run stops. Create the folder and file if missing.
@@ -29,6 +29,9 @@ Every twin-dev skill and agent records its failures in one shared file,
   validation that failed after a change; a step you had to retry or do another
   way; a wrong assumption.
 - If a later attempt fixes an earlier `unresolved` entry, update its **Fix** line.
+- A **gap** isn't an error: the instructions had no rule for something you
+  met, so you worked it out or the user told you what to do. Log it as a gap
+  entry (below), so `improve-skills` can turn it into a rule.
 - Never write passwords, tokens, API keys or customer data into the log.
 
 Design ambiguities and decisions are not failures; they go in `build.decisions`.
@@ -43,6 +46,14 @@ Entry format (newest at the bottom):
 - **Fix:** what worked, or `unresolved`
 ```
 
+Gap entry:
+
+```markdown
+## YYYY-MM-DD · store-builder · gap · <store>.myshopify.com (or "no store")
+- **Missing:** what the instructions didn't cover
+- **Did:** what you did, or what the user said to do
+```
+
 ## Inputs
 
 Use the first source that has a value: your task, then the project's
@@ -53,6 +64,7 @@ Use the first source that has a value: your task, then the project's
 | Store name | `storeName` | Use the Figma file's name, minus words like "Design", "Website", "Shopify", "v2". |
 | Figma link | `figmaUrl` | Stop: nothing to build. This is the only input you can't work around. |
 | Store domain (`<store>.myshopify.com`) | `store` | Build locally. Mark `push`, `images` and `menus` as `blocked` with the input needed. |
+| Target theme ID | `themeId` (with `themeSource: "existing"`) | Push a new unpublished theme, and record as a decision that it won't get Horizon update notices. |
 | Base theme folder | `baseTheme` | `$TWIN_DEV_BASE_THEME`. Only a new build needs it; if it's unset, stop and report. |
 | Alt text | `build.answers.altText` | `user` (`needsAlt`). The user can say "Claude writes alt text" (`claude`). |
 | Abbreviation | — | The store's initials when the theme name is too long. |
@@ -131,8 +143,10 @@ When `build` already exists:
    execute` now works without a login). If it is, set it to `pending`;
    otherwise leave it and move on.
 3. **Check what's marked done** before relying on it: the `themeId` still
-   appears in `shopify theme list` (if it was deleted, set `push` to `pending`
-   and create a new unpublished theme, recorded as a decision); the menu handles
+   appears in `shopify theme list` (if it was deleted: when `themeSource` is
+   `existing`, mark `push` `blocked` with "target theme <id> no longer exists,
+   give a new theme ID"; otherwise set `push` to `pending` and create a new
+   unpublished theme, recorded as a decision); the menu handles
    in `build.menus` and the page IDs in `pages` still exist; the `cc-` files listed for done pages are still
    in the folder. Anything missing goes back to `pending`.
 4. **Reuse decisions.** Apply every decision in `build.decisions` as recorded.
@@ -146,8 +160,22 @@ When `build` already exists:
 ## What you may do without asking
 
 - Create the project folder and edit any file inside it.
-- `shopify theme push --unpublished` **once** to create the project's theme, then
-  push only to that theme ID (from `.twin-dev.json`).
+- Push the build into the **target theme ID** from your task or `.twin-dev.json`
+  (`new-store-theme` step 3A: rename it to the theme name, then push every
+  file), but only when all of these hold:
+  - it's in `shopify theme list` and its role isn't `live`;
+  - its `theme_info` says Horizon, with the same `theme_version` as the base
+    theme;
+  - its current name is `Horizon` (fresh from the Theme Store) or already this
+    project's theme name.
+
+  If any check fails, don't push and don't fall back to a new theme: mark
+  `push` `blocked` with what failed (for example "target theme 1234 is Horizon
+  3.2.0, base is 3.1.0: update the base or give another theme ID") and keep
+  building locally.
+- Without a target theme ID, `shopify theme push --unpublished` **once** to
+  create the project's theme.
+- After that, push only to the project's theme ID (from `.twin-dev.json`).
 - Create the pages the design links to, and assign a template to existing pages
   that use the default one (`shopify-pages`). New pages are published and empty.
 - Add a missing page template to the **live** theme, only as `shopify-pages`
@@ -168,7 +196,8 @@ When `build` already exists:
 - Ask the user a question or stop to wait for an answer.
 - Edit the base theme folder.
 - Push to any other theme, the live theme (except a new page template, above), or
-  a theme ID you didn't create or read from `.twin-dev.json`. Never run `shopify theme publish`.
+  a theme ID you didn't create, read from `.twin-dev.json` or get as the target
+  theme in your task. Never run `shopify theme publish`.
 - Update or delete existing menus, or create a menu whose handle is taken.
   Record it in `blocked.menus` with the plan instead. A handle in `build.menus`
   is one you created, so skip it rather than creating it again.
@@ -207,8 +236,10 @@ Save each one to `build.decisions` (step, topic, choice, why) as you make it.
 Each step's key in `build.steps` is in brackets.
 
 1. [`setup`] Folder, theme name, `.twin-dev.json` (`new-store-theme` steps 1–2).
-2. [`push`] Run `shopify theme check`, then push unpublished and save the store
-   and theme ID (step 3).
+2. [`push`] Run `shopify theme check`, then push into the target theme ID if
+   there is one, else as a new unpublished theme, and save `store`, `themeId`
+   and `themeSource` (`new-store-theme` step 3). Pass `--theme-id` to the
+   setup script in step 1 when the task gives one.
 3. [`tokens`] Read the design and apply global tokens (`figma-to-theme` 1–3).
 4. [`images`] Upload images (`shopify-files`), so sections can use them as you
    build.
@@ -244,7 +275,8 @@ Your report is the only thing the user sees, so make it complete:
 
 1. **Status**: done / done with gaps / stopped, in one line, with the reason.
    For a resumed run, say which steps this run did.
-2. **Project**: theme name, folder path, base version, store, theme ID, preview
+2. **Project**: theme name, folder path, base version, store, theme ID (target
+   theme, or newly pushed with no update notices), preview
    and editor URLs.
 3. **Built**: per page, its sections and the `cc-` files you created.
 4. **Store changes**: pages created or assigned a template, templates added to

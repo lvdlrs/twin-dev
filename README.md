@@ -32,19 +32,20 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 |---|---|
 | `/twin-dev:horizon-theme` | Horizon conventions. Loads automatically when editing theme code. |
 | `/twin-dev:shopify-theme-deploy` | Safe preview / push / pull / publish with Shopify CLI. Manual only. |
-| `/twin-dev:new-store-theme` | Start a store build: copy the base Horizon theme into a new project folder, name it `<Store> x Hv<version>(Momentum in progress...)`, push it unpublished, then build the Figma design. |
+| `/twin-dev:new-store-theme` | Start a store build: copy the base Horizon theme into a new project folder, name it `<Store> x Hv<version>(Momentum in progress...)`, push it into a target theme ID (Horizon added from the Theme Store, so it keeps update notices) or as a new unpublished theme, then build the Figma design. |
 | `/twin-dev:figma-to-theme` | Pull colours, type, spacing and layouts from Figma into theme settings and sections. |
 | `/twin-dev:shopify-store-auth` | Connect Shopify CLI to a store: check the CLI, log in for theme pushes, authorize menu, page and file scopes, and verify. Run it before the first build on each store. |
 | `/twin-dev:shopify-files` | Download images from Figma, upload them to Shopify Files with alt text, and set them in the theme's image settings. |
 | `/twin-dev:shopify-pages` | Create the pages the design links to (plus Visit the Store, All Looks, All Brands), match their templates to the live theme's names, and add missing templates to live as copies of its `page.json`. Run before `shopify-menus`. |
 | `/twin-dev:section-library` | Search and reuse `cc-` sections from past stores (client-customized copies and older base versions included), port them to this project's base, and record new builds. Run `library.mjs scan` once to index past projects. |
-| `/twin-dev:shopify-menus` | Create, update, back up and restore navigation menus in the Shopify admin (via `shopify store execute`). |
+| `/twin-dev:shopify-menus` | Create, update, back up and restore navigation menus in the Shopify admin (via `shopify store execute`). Shipping, Returns and Privacy items link to the store's policies, or `#` if a policy isn't set up. |
+| `/twin-dev:improve-skills` | Turn the failure log's repeated failures, user corrections and gaps into rules in the skills and agents (edits the repo after you approve), and mark those entries as promoted. |
 
 ### Agents
 
 | Agent | Use |
 |---|---|
-| `store-builder` | Build or continue a store from Figma end to end, without asking questions: project folder, unpublished theme, tokens, sections, menus, images. Saves its progress and decisions in `.twin-dev.json` and resumes from there. Run `qa-checker` after it. |
+| `store-builder` | Build or continue a store from Figma end to end, without asking questions: project folder, target or new unpublished theme, tokens, sections, menus, images. Saves its progress and decisions in `.twin-dev.json` and resumes from there. Run `qa-checker` after it. |
 | `theme-reviewer` | Review changed Liquid/schema/CSS/JS before pushing. |
 | `theme-explorer` | Find where something is rendered, styled or configured. |
 | `accessibility-auditor` | WCAG 2.2 AA audit of sections and components. |
@@ -77,6 +78,13 @@ and every skill and agent reads them from there:
 ```json
 { "store": "acme-coffee.myshopify.com", "themeId": 123456789012, "figmaUrl": "https://www.figma.com/design/..." }
 ```
+
+To keep Horizon update notices, add Horizon from the Theme Store first
+(**Online Store > Themes > Add theme**) and give its ID when starting the build
+(`--theme-id`, or "build into theme 123456789012"). The build is pushed into
+that theme and saved with `"themeSource": "existing"`. Without one, a new
+unpublished theme is pushed (`"pushed"`), which Shopify treats as uploaded and
+never offers updates for.
 
 A value given in the conversation overrides the file. Missing values are asked
 for once and saved back. Storefront passwords are never saved.
@@ -141,7 +149,21 @@ are findings, not failures. `theme-explorer` can't write files, so it lists its
 failures in its report for the main session to log. Secrets and customer data are
 never logged.
 
-When an entry keeps coming back, move the fix into the skill or agent itself.
+**Gaps** are logged too: times a skill had no rule for something, so the agent
+worked it out or the user said what to do.
+
+```markdown
+## 2026-10-19 · shopify-menus · gap · acme-coffee.myshopify.com
+- **Missing:** no rule for Shipping / Returns / Privacy menu items
+- **Did:** linked them to the store policies, "#" when a policy is missing
+```
+
+The log only lives on one computer. To share what it taught, run
+`/twin-dev:improve-skills` every so often (or after a build with failures). It
+groups the entries by skill, proposes a rule for each repeated failure, user
+correction and gap, edits the skills in this repo once you approve, bumps the
+plugin version and marks the entries `Promoted` or `Dismissed`. Commit and push,
+then update the plugin on the other computers.
 
 ## Add more
 

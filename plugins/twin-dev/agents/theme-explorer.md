@@ -16,7 +16,9 @@ twin-dev keeps a shared log of failures at `~/.claude/twin-dev/failures.md`. You
 can't write to it, so if a search or tool call fails, or you can't find
 something you were asked for, end your report with a **Failures** list headed "Add to
 `~/.claude/twin-dev/failures.md`": for each, what you tried and what went wrong,
-so the caller can log it.
+so the caller can log it. If these instructions had no rule for something you
+met and you had to work it out, list it the same way as a **Gap** (what was
+missing, what you did).
 
 ## How to search
 
