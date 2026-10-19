@@ -351,6 +351,14 @@ exact match for a Figma section. Write the mapping out like this:
   global token; `custom` only for the extra styles listed in step 2.
 - Buttons: `style_class` `button` / `button-secondary` when they match the global
   button tokens; `button-custom` only for one-off buttons.
+- **Instagram feed** (a grid or row of Instagram posts, often with an
+  `@handle` or "Follow us" heading): use the `section` **Instafeed** preset, whose
+  `cc-instafeed` block is the mount point for the Instafeed app. Copy the preset's
+  block structure, put the design's heading and handle in its `header` group, and
+  set the block's `dgap` / `mgap` from the grid's gaps. Don't build the posts as
+  images or a new `cc-` section, and don't download or upload the post images:
+  the app pulls them from Instagram. List "install and connect the Instafeed app"
+  for the merchant.
 - Only create a new section, block, snippet or asset when no existing one can do
   it. Name it with a `cc-` prefix (`sections/cc-feature-banner.liquid`) and follow
   the `horizon-theme` skill when you do.
@@ -397,6 +405,8 @@ menus as that skill's step 4 describes.
 
 ## 6. Assets
 
+- Never download Instagram feed images (the post tiles in an Instagram
+  section): the `cc-instafeed` block shows them from the Instafeed app.
 - Use `download_assets` for images and icons the theme needs. Save them in a
   folder outside the theme (the scratchpad, or `figma-assets/` in the project
   root, which Shopify CLI doesn't upload), named after the section they belong

@@ -79,6 +79,9 @@ From Figma (needs the Figma MCP tools), go page by page:
 3. Skip product photos and images of collections or products that exist in the
    store. Those belong on the product or collection, not in Files. List them for
    the merchant instead.
+4. Skip Instagram feed images (the post tiles in an Instagram section). That
+   section is built with the `cc-instafeed` block, and the Instafeed app pulls
+   the posts from Instagram.
 
 From a folder the user gives: use the images in it as they are.
 

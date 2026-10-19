@@ -223,6 +223,10 @@ Save each one to `build.decisions` (step, topic, choice, why) as you make it.
 - **Brand font not in the Shopify font library**: load it from Google Fonts if
   it's there. If it isn't, use the closest font in the Shopify library (same
   classification, similar width and x-height).
+- **Instagram section**: build it from the `section` **Instafeed** preset
+  (`cc-instafeed` block), never as images or a new `cc-` section, and don't
+  download or upload its post images: the Instafeed app pulls them from
+  Instagram. Add "install and connect the Instafeed app" to the merchant to-do.
 - **Missing resources** (page, collection, product): link to `#` and list it.
 - **Ambiguous design** (unclear component, missing state, conflicting frames):
   choose the option closest to the desktop frame, then the theme default.
@@ -285,7 +289,8 @@ Your report is the only thing the user sees, so make it complete:
    design ambiguities). Say they're saved and that a later run will keep them
    unless the user gives a different answer.
 6. **Merchant to-do** checklist (`- [ ]`): items linked to `#`, images that need
-   alt text, product and collection images, and content missing from the design.
+   alt text, product and collection images, content missing from the design, and
+   the Instafeed app if you built an Instagram section.
 7. **Blocked**: each `blocked` or `failed` step with the exact command or input
    that unblocks it.
 8. **Next**: if anything is blocked, the line to run after fixing it:
