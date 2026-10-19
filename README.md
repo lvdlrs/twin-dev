@@ -52,11 +52,33 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 | `schema-locale-checker` | Cross-check schemas, presets, templates and translation keys. |
 | `qa-checker` | Pre-launch QA: code, templates, settings, browser pass, and Figma vs preview 1:1 with every discrepancy listed. Uses the same design-match standard as the build, and names the fix for each discrepancy. |
 
-Ask for an agent in plain words, for example "use the theme-reviewer agent on my changes", or:
+Ask for an agent in plain words, for example "use the theme-reviewer agent on my changes".
+
+To start a store build, give the store-builder its inputs by name:
 
 ```
-Use the store-builder agent: store "Acme Coffee Co", Figma <link>, store acme-coffee.myshopify.com
+Use the store-builder agent:
+storeName "Acme Coffee Co"
+figmaUrl https://www.figma.com/design/...
+store acme-coffee.myshopify.com
+themeId 123456789012
+altText claude
+scope home page, product page
 ```
+
+| Input | Required | If you leave it out |
+|---|---|---|
+| `storeName` | No | Taken from the Figma file's name, minus words like "Design", "Website", "Shopify", "v2". |
+| `figmaUrl` | **Yes** | The build stops: there's nothing to build. |
+| `store` (`<store>.myshopify.com`) | No | Builds locally only. Push, images and menus are marked `blocked` until you add it. |
+| `themeId` | No | Pushes a new unpublished theme, which won't get Horizon update notices. |
+| `baseTheme` | No | Uses `$TWIN_DEV_BASE_THEME`, then `baseTheme` in `~/.claude/twin-dev/config.json`, then clones the base theme repo. |
+| `altText` | No | Who writes the alt text for uploaded images. `user` (default): images upload without it and are listed in the report to fill in under **Content > Files** (the logo and decorative images still get theirs). `claude`: Claude looks at each image and writes it, which costs more tokens on image-heavy designs. |
+| `scope` | No | The whole design. Name pages or sections to limit it. |
+
+Anything else in the message (a font, a colour, a page to skip, "rebuild the
+home page") is saved as an answer and used for the rest of the build. Inputs
+are saved to `.twin-dev.json`, so a later run only needs the store name.
 
 For a new store, run `/twin-dev:shopify-store-auth <store>.myshopify.com` first
 so the build doesn't stop for a login.
