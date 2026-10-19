@@ -33,24 +33,24 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 | `/twin-dev:horizon-theme` | Horizon conventions. Loads automatically when editing theme code. |
 | `/twin-dev:shopify-theme-deploy` | Safe preview / push / pull / publish with Shopify CLI. Manual only. |
 | `/twin-dev:new-store-theme` | Start a store build: copy the base Horizon theme into a new project folder, name it `<Store> x Hv<version>(Momentum in progress...)`, push it into a target theme ID (Horizon added from the Theme Store, so it keeps update notices) or as a new unpublished theme, then build the Figma design. |
-| `/twin-dev:figma-to-theme` | Pull colours, type, spacing and layouts from Figma into theme settings and sections. |
+| `/twin-dev:figma-to-theme` | Pull colours, type, spacing and layouts from Figma into theme settings and sections. Each section is built against a spec, measured in the browser and fixed until it matches 1:1 (see [Design match](#design-match)). Recurring store components (quick links bar, purchase benefits, stock alert, Instagram feed) are built with set theme components. |
 | `/twin-dev:shopify-store-auth` | Connect Shopify CLI to a store: check the CLI, log in for theme pushes, authorize menu, page and file scopes, and verify. Run it before the first build on each store. |
-| `/twin-dev:shopify-files` | Download images from Figma, upload them to Shopify Files with alt text, and set them in the theme's image settings. |
+| `/twin-dev:shopify-files` | Download images from Figma, upload them to Shopify Files with alt text, and set them in the theme's image settings. Instagram feed images are skipped: the `cc-instafeed` block pulls them from the Instafeed app. |
 | `/twin-dev:shopify-pages` | Create the pages the design links to (plus Visit the Store, All Looks, All Brands), match their templates to the live theme's names, and add missing templates to live as copies of its `page.json`. Run before `shopify-menus`. |
 | `/twin-dev:section-library` | Search and reuse `cc-` sections from past stores (client-customized copies and older base versions included), port them to this project's base, and record new builds. Run `library.mjs scan` once to index past projects. |
-| `/twin-dev:shopify-menus` | Create, update, back up and restore navigation menus in the Shopify admin (via `shopify store execute`). Shipping, Returns and Privacy items link to the store's policies, or `#` if a policy isn't set up. |
+| `/twin-dev:shopify-menus` | Create, update, back up and restore navigation menus in the Shopify admin (via `shopify store execute`). Shipping, Returns and Privacy items link to the store's policies, or `#` if a policy isn't set up. A quick links row under the header gets its own `Momentum - Mobile Quick Links` menu on the `cc-header-quick-links` section. |
 | `/twin-dev:improve-skills` | Turn the failure log's repeated failures, user corrections and gaps into rules in the skills and agents (edits the repo after you approve), and mark those entries as promoted. |
 
 ### Agents
 
 | Agent | Use |
 |---|---|
-| `store-builder` | Build or continue a store from Figma end to end, without asking questions: project folder, target or new unpublished theme, tokens, sections, menus, images. Saves its progress and decisions in `.twin-dev.json` and resumes from there. Run `qa-checker` after it. |
+| `store-builder` | Build or continue a store from Figma end to end, without asking questions: project folder, target or new unpublished theme, tokens, sections, menus, images. Runs the design-match loop on every page and reports the match counts, a **Manual fixes** list and the merchant to-do. Saves its progress and decisions in `.twin-dev.json` and resumes from there. Run `qa-checker` after it. |
 | `theme-reviewer` | Review changed Liquid/schema/CSS/JS before pushing. |
 | `theme-explorer` | Find where something is rendered, styled or configured. |
 | `accessibility-auditor` | WCAG 2.2 AA audit of sections and components. |
 | `schema-locale-checker` | Cross-check schemas, presets, templates and translation keys. |
-| `qa-checker` | Pre-launch QA: code, templates, settings, browser pass, and Figma vs preview 1:1 with every discrepancy listed. |
+| `qa-checker` | Pre-launch QA: code, templates, settings, browser pass, and Figma vs preview 1:1 with every discrepancy listed. Uses the same design-match standard as the build, and names the fix for each discrepancy. |
 
 Ask for an agent in plain words, for example "use the theme-reviewer agent on my changes", or:
 
@@ -99,6 +99,41 @@ Agents can't ask questions mid-run. When `qa-checker` is missing something (a
 Figma link, the theme ID, the storefront password), it finishes what it can and
 returns a **Need from you** list: ask the user for each item, save the domain,
 theme ID and Figma link to `.twin-dev.json`, and run it again.
+
+## Design match
+
+`figma-to-theme`, `store-builder` and `qa-checker` share one standard,
+[`references/design-match.md`](plugins/twin-dev/skills/figma-to-theme/references/design-match.md),
+so a page the build calls a match is also a match in QA:
+
+1. **Spec**: one row per element of each Figma section (colour, font size,
+   weight, line height, letter spacing, box, padding, gaps), saved in the
+   project's `figma-build.md`.
+2. **Measure**: the live section at the frame's exact width, with one browser
+   script.
+3. **Tolerance**: colour, spacing, font size and font weight must match exactly;
+   everything else within 1px.
+4. **Fix ladder**: global setting, then section or block setting, then a
+   reused or new `cc-` section or block, then CSS in the `cc-` file's own
+   `{% stylesheet %}` or a new setting. Stock (non-`cc-`) files are never
+   edited: those changes are listed as `manual` fixes for a developer.
+5. **Loop** until only `manual`, `content`, `theme limit` or `design`
+   mismatches remain.
+
+### Recurring store components
+
+Most designs have these, styled differently per store. They're recognised by
+what they do and where they sit, and always built the same way:
+
+| Component | Built with |
+|---|---|
+| Quick links bar under the header | `cc-header-quick-links` section (carousel) with a `Momentum - Mobile Quick Links` menu |
+| Purchase benefits / USPs | `product-usp` block; a stock row is tied to inventory |
+| Stock alert | An existing product block that fits, otherwise a new inventory-tied `cc-` block |
+| Instagram feed | The Instafeed preset (`cc-instafeed` block). Post images aren't downloaded; "install and connect the Instafeed app" goes on the merchant to-do |
+
+A repeated component that isn't listed is logged as a gap, so
+`/twin-dev:improve-skills` can add it.
 
 ## Section library
 
