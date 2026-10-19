@@ -435,6 +435,26 @@ exact match for a Figma section. Write the mapping out like this:
   global token; `custom` only for the extra styles listed in step 2.
 - Buttons: `style_class` `button` / `button-secondary` when they match the global
   button tokens; `button-custom` only for one-off buttons.
+- Standalone text links ("View all looks", "Shop now →", "Read more" next to
+  or under a heading, with no fill or border) are `button` blocks too, never
+  a `text` block with a link in its rich text. Pick the style by what the
+  design needs:
+  - **Link** (`button-unstyled`) when the paragraph font matches the design.
+    It only adds `link_text_color` and `underline`; set those to match.
+  - **Custom** (`button-custom`) when the link needs its own size, weight,
+    letter spacing or uppercase, as small letter-spaced caps links do. Make it
+    look like a link: background, border and hover background
+    `rgba(0,0,0,0)`, text and hover text the design's colours,
+    `custom_padding_block` and `custom_padding_inline` 0, then set `font`,
+    `font_size` / `font_size_mobile`, `weight`, `letter_spacing(_mobile)` and
+    `case` from the design.
+  - An arrow uses the block's `icon` setting (`icon_position` right). Styling
+    neither style has a setting for (an underline on a Custom link, a custom
+    hover) goes up the design-match fix ladder like any other gap.
+  - A heading with the link on the same row (heading left, link right): put
+    both in a `group` with `content_direction` row, `horizontal_alignment`
+    `space-between` and `vertical_alignment` from the design (usually
+    `flex-end`), so the link stays a real block the merchant can edit.
 - Components in **Recurring store components** (quick links bar, purchase
   benefits, stock alert, Instagram feed) follow the rules there.
 - Use the theme's settings as far as they go: global settings, then section and
