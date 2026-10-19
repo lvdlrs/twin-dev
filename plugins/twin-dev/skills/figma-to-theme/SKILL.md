@@ -93,11 +93,16 @@ Gap entry:
    page frame. It returns the variables and styles the nodes use, so a page frame
    catches tokens the style guide misses. Collect colours, text styles (family,
    weight, size, line height, letter spacing, case), spacing, radius and shadows.
-3. **Screenshots.** `get_screenshot` of each page frame (raise `maxDimension` to
-   ~2000 for long pages, or screenshot sections separately) so you see the layout.
-4. **Details.** `get_design_context` on each section you'll build, one at a time.
-   If it returns only metadata because the node is too big, call it on the child
-   section nodes instead. Don't pull a whole page at once.
+3. **Screenshots.** The page frame's child nodes in `get_metadata` give the
+   section order. Take one `get_screenshot` of a page frame, at the default
+   size, only when that tree doesn't make the layout clear. Section images come
+   with step 4.
+4. **Details.** `get_design_context` on each section you'll build, one at a time,
+   when you write its spec. If it returns only metadata because the node is too
+   big, call it on the child section nodes instead. Don't pull a whole page at
+   once. Follow **Keep the context small** in `references/design-match.md`:
+   each Figma node is read once, and the spec in `figma-build.md` replaces it
+   after that.
 
 If the file has no variables or styles, read colours and fonts from the design
 context and say they were inferred. Count the distinct text styles the pages
@@ -269,9 +274,15 @@ disagrees with the script's output, go with the script.
 
 ### Order
 
-Work through the Figma pages one at a time, in this order: header and footer,
-home, product, collection, then content pages. Header, footer and the product
-card appear on every page, so match them first.
+Create the menus (step 5) before you build anything here, right after the
+global settings, so the header and footer are matched with their real menus.
+
+Then work through the Figma pages one at a time, in this order: header and
+footer, home, collection, product, 404, search, Visit the Store, then the other
+content pages. Build each page's sections one by one, desktop and then mobile.
+Header, footer and the product card appear on every page, so match them first.
+404, search and Visit the Store follow **Standard pages** when the design has
+no frame for them.
 
 Before building a new `cc-` section or block for a design component, search past
 stores with the `section-library` skill and reuse or port the closest match. When
@@ -382,6 +393,66 @@ When a design repeats a component that isn't on this list, and it's the same
 kind of thing across stores (a size guide link, a delivery estimate, a
 payment icons row), log it as a gap. `improve-skills` can then add it here.
 
+### Standard pages: 404, search, Visit the Store
+
+Most designs leave these pages out. When the design has a frame for one, build
+it from the frame like any other page. Otherwise set it up as below, with this
+store's global settings, and use the home page as the style reference. Then
+measure it like any page: its spec comes from the home page elements it copies.
+
+- **404** (`templates/404.json`):
+  - The heading and body text take the home page's heading and body styling.
+    Use the `type_preset` of the matching global style (`h1`–`h6`,
+    `paragraph`, the same one the home page's section headings and body text
+    use in `templates/index.json`) instead of the template's `custom` font,
+    size and case. Use the same text colour as on the home page. Keep the copy
+    and the button.
+  - Add a `collection-list` section after `main` with 4 collections. Use the
+    store's collections for **Tops, Bottoms, Accessories and Shoes**, matched
+    by title or handle, singular or plural ("Top", "Tops", `tops`). List them
+    with `shopify store execute` (`collections(first: 250) { nodes { handle
+    title } }`). Fill a missing slot with the next collection in the main
+    menu's top level. If the store still has fewer than 4, leave the slot out
+    and add it to the merchant to-do. Without store access, leave
+    `collection_list` empty and add it to the to-do. Never invent a handle.
+  - Style it like the home page's collection list if it has one (copy that
+    section's settings and block tree). Otherwise use the
+    `Collection list: Grid` preset with `columns` and `max_collections` 4.
+- **Search** (`templates/search.json`):
+  - In the `search-results` section's `filters` block, set `enable_filtering`
+    and `enable_sorting` to `false`. Keep the block's other settings.
+  - Give the results the same product card as the collection page: copy the
+    `_product-card` block's settings, child blocks and `block_order` from
+    `templates/collection.json`'s `main-collection` section into the
+    `search-results` card. Keep the block's own ID and `static` flag. Also
+    copy `product_card_size`, `mobile_product_card_size`,
+    `columns_gap_horizontal` and `columns_gap_vertical`.
+- **Visit the Store** (`templates/page.visit-the-store.json`, the page
+  `shopify-pages` creates). Its image, heading, text and Directions button
+  live in the first section, and the map in the `custom-liquid` section:
+  - **Address and hours**: take them from the design (footer, contact page,
+    store locator) first. Otherwise open the store's public Google Maps
+    listing in the browser (search the store name and city) and read the
+    address and opening hours. Put the address, then the hours (one line per
+    day or day range), in the text block. Anything you can't find stays
+    empty and goes on the merchant to-do. Never guess an address or hours.
+  - **Directions**: the button links to
+    `https://www.google.com/maps/dir/?api=1&destination=<URL-encoded address>`,
+    with `open_in_new_tab` on.
+  - **Map**: set the `custom-liquid` section's `custom_liquid` to an embed of
+    the same address:
+    `<iframe src="https://www.google.com/maps?q=<URL-encoded address>&output=embed" title="Map of <store name>" width="100%" height="450" style="border:0" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`.
+    Leave it empty when there's no address.
+  - **Feature image**: never download photos from Google Maps. They're
+    covered by Google's terms and usually belong to whoever took them. Use a
+    storefront image from the design if it has one (upload it with
+    `shopify-files`). Otherwise leave `image` empty and add a merchant to-do:
+    "Visit the Store: pick a storefront photo from the Google Maps listing
+    (<listing URL>) or from the client, upload it to Content > Files, and set
+    it on the page's image".
+  - Heading and text take the home page's heading and body styling, as on
+    the 404 page.
+
 ### Skip pages that already match
 
 Before building a page, check whether the downloaded theme already matches it:
@@ -394,7 +465,8 @@ Before building a page, check whether the downloaded theme already matches it:
    colours and fonts through those.
 3. If a browser tool and a preview URL are available, measure the page against
    its spec (`references/design-match.md` steps 1–3). A page with any fixable
-   mismatch doesn't match: build it as below.
+   mismatch doesn't match: build it as below. Keep the spec you wrote, so
+   building the page doesn't read Figma again.
 
 If the page matches, don't touch its template. Add it to the **QA later** list
 with the template path, the Figma frame, and how you checked it (template only,
@@ -500,6 +572,8 @@ their labels. Without a browser tool, say so, mark the page `built` (not
 checked), and leave the comparison to the `qa-checker` agent.
 
 ## 5. Menus
+
+Do this before step 4 builds the header and footer.
 
 Read every menu in the design: header nav, mega menu, mobile drawer, footer
 columns, and utility or legal links. First run the `shopify-pages` skill, so every

@@ -92,6 +92,10 @@ Add the standard pages:
 | All Looks | `all-looks` | `page.all-looks.json` | Only if the design has a Looks / Shop the Look section or link |
 | All Brands | `all-brands` | `page.all-brands.json` | Only if the design has a brand list (brand logos, Brands menu or page) |
 
+This skill only creates the pages. The Visit the Store template's content
+(address, hours, directions, map, photo) is filled in by `figma-to-theme`
+"Standard pages".
+
 For each page note: the title as the design writes it, a handle (the title in
 lowercase with hyphens), where it's linked from, and **our template**: the
 project's `templates/page.<name>.json` built for it, if any (match by name, for

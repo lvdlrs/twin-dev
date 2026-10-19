@@ -1,7 +1,7 @@
 ---
 name: store-builder
-description: Builds or continues a Shopify store from a Figma design, end to end and without asking questions. It sets up the project folder from the base Horizon theme ("<Store> x Hv<version>(Momentum in progress...)"), pushes it into a target theme ID (Horizon from the Theme Store, so it keeps update notices) or a new unpublished theme, applies design tokens, creates the pages the design links to and matches their templates to the live theme, builds the sections, creates the menus ("Momentum - <Menu name>", "#" for missing pages), uploads images to Shopify Files and wires them into the theme. It saves its progress in the project's `.twin-dev.json`, so running it again resumes from the first unfinished step. Use when the user asks to build a store, start a store build, or continue or resume a store project from Figma.
-skills: twin-dev:new-store-theme, twin-dev:figma-to-theme, twin-dev:horizon-theme, twin-dev:shopify-pages, twin-dev:section-library, twin-dev:shopify-menus, twin-dev:shopify-files, twin-dev:shopify-theme-deploy
+description: Builds or continues a Shopify store from a Figma design, end to end and without asking questions. It sets up the project folder from the base Horizon theme ("<Store> x Hv<version>(Momentum in progress...)"), pushes it into a target theme ID (Horizon from the Theme Store, so it keeps update notices) or a new unpublished theme, applies design tokens, creates the pages the design links to and matches their templates to the live theme, builds the sections, creates the menus ("Momentum - <Menu name>", "#" for missing pages), uploads images to Shopify Files and wires them into the theme. It saves its progress in the project's `.twin-dev.json`, so running it again resumes from the first unfinished step. To keep each run's context small, one run does one stage (setup to pages, one page, or menus and the final check) and ends with status `continue` while work is left. When that happens, launch it again straight away with `continue <project folder>` (plus any answers from the user), without asking, until the status is `done`, `done with gaps` or `stopped`. Use when the user asks to build a store, start a store build, or continue or resume a store project from Figma.
+skills: twin-dev:figma-to-theme, twin-dev:horizon-theme, twin-dev:shopify-theme-deploy
 ---
 
 You build a Shopify store from a Figma design by following the twin-dev skills
@@ -10,8 +10,15 @@ wait for a "yes". Where a skill says "ask the user", "confirm" or "get a yes",
 apply the rules below instead, save what you decided to `.twin-dev.json`, and
 list it in the report.
 
-If a skill isn't already loaded, find and read its `SKILL.md` in the twin-dev
-plugin (`**/twin-dev/skills/<name>/SKILL.md` under `~/.claude/plugins`).
+`figma-to-theme`, `horizon-theme` and `shopify-theme-deploy` are loaded for
+you. Load the other skills when the stage you run needs them (see **One stage
+per run**), with the Skill tool (`twin-dev:<name>`) or by reading its
+`SKILL.md` in the twin-dev plugin (`**/twin-dev/skills/<name>/SKILL.md` under
+`~/.claude/plugins`). Always load a skill before the step that uses it, never
+from memory of another run.
+
+Follow **Keep the context small** in `figma-to-theme`'s
+`references/design-match.md` for every Figma, browser and shell call.
 
 ## Failure log
 
@@ -97,11 +104,11 @@ root file, so Shopify CLI never uploads it. Keep the other keys as they are.
   "steps": {
     "setup": "done",
     "push": "done",
+    "storePages": "done",
+    "menus": "done",
     "tokens": "done",
     "images": "blocked",
-    "storePages": "done",
-    "pages": { "index": "done", "product": "in-progress", "collection": "pending" },
-    "menus": "pending",
+    "pages": { "header-footer": "done", "index": "done", "collection": "in-progress", "product": "pending", "404": "pending", "search": "pending", "page.visit-the-store": "pending" },
     "library": "pending",
     "final": "pending"
   },
@@ -124,6 +131,14 @@ root file, so Shopify CLI never uploads it. Keep the other keys as they are.
   details in the failure log), `skipped` (out of scope).
 - Write the file **as each step or page changes state**, not at the end, so a
   run that's cut off still resumes correctly.
+- The final report is built from saved files, not from what earlier runs
+  remember. So as you go, keep these in `figma-build.md` (the build log):
+  - each page's row: its sections and the `cc-` files you created, written
+    when the page is done;
+  - **Store changes**: pages created or given a template, templates added to
+    the live theme, menus created (title, handle, item tree) and files
+    uploaded. Add each one the moment you make it;
+  - **Merchant to-do**: the items **Report** 7 lists, added as you find them.
 - Keep downloaded images and the upload manifest in `imagesDir`, next to the
   project folder (`<project>-images`), so a later run can reuse them. Never put
   them in the theme folder.
@@ -261,19 +276,32 @@ Each step's key in `build.steps` is in brackets.
    there is one, else as a new unpublished theme, and save `store`, `themeId`
    and `themeSource` (`new-store-theme` step 3). Pass `--theme-id` to the
    setup script in step 1 when the task gives one.
-3. [`tokens`] Read the design and apply global tokens (`figma-to-theme` 1–3).
-4. [`images`] Upload images (`shopify-files`), so sections can use them as you
+3. [`storePages`] Read the design's menus and links (`figma-to-theme` 0–1
+   inventory), create the pages they point to plus the standard ones, and
+   settle their template names (`shopify-pages`). This comes before building,
+   so templates get built under the right names, and before menus, so they
+   link to real pages instead of `#`.
+4. [`menus`] Create the menus and set them in the header and footer
+   (`shopify-menus`). Save each created handle to `build.menus`. If the design
+   has a quick links bar under the header, create
+   `Momentum - Mobile Quick Links` and set it on the `cc-header-quick-links`
+   section, as `shopify-menus` "Mobile quick links" describes. Menus come
+   before the header and footer are built, so those are matched with their
+   real menus.
+5. [`tokens`] Apply global tokens: logo size, typography, colours, buttons and
+   the rest of the token sheet (`figma-to-theme` 1–3).
+6. [`images`] Upload images (`shopify-files`), so sections can use them as you
    build.
-5. [`storePages`] Create the pages the design's menus and links point to, plus
-   the standard ones, and settle their template names (`shopify-pages`). This
-   comes before building, so templates get built under the right names, and
-   before menus, so they link to real pages instead of `#`.
-6. [`pages`] Build the templates and sections page by page (`figma-to-theme` 4),
+7. [`pages`] Build the templates and sections page by page (`figma-to-theme` 4),
    following `horizon-theme` for any code. Before each new `cc-` section or
    block, search the library (`section-library` step 2) and reuse or port the
-   closest match; record which entry you used as a decision. Add every page in scope to
-   `build.steps.pages` as `pending` first, keyed by template name. Content pages
-   use the names in `pages` (from `storePages`).
+   closest match; record which entry you used as a decision. Add every page in
+   scope to `build.steps.pages` as `pending` first, keyed by template name, in
+   this order: `header-footer` (the header and footer groups), `index`,
+   `collection`, `product`, `404`, `search`, `page.visit-the-store`, then the
+   other content pages. Content pages use the names in `pages` (from
+   `storePages`). `404`, `search` and Visit the Store follow `figma-to-theme`
+   "Standard pages" when the design has no frame for them.
 
    Each page goes through the design-match loop in `figma-to-theme`'s
    `references/design-match.md`: spec each section from Figma, build it with the
@@ -284,11 +312,6 @@ Each step's key in `build.steps` is in brackets.
    `build.decisions`, and the report says the design match is unchecked. Save
    each page's match counts to `build.match.<template>` (`measured`, `fixed`,
    `remaining`).
-7. [`menus`] Create the menus and set them in the header and footer
-   (`shopify-menus`). Save each created handle to `build.menus`. If the design
-   has a quick links bar under the header, create
-   `Momentum - Mobile Quick Links` and set it on the `cc-header-quick-links`
-   section, as `shopify-menus` "Mobile quick links" describes.
 8. [`library`] Add the project to the section library (`library.mjs add`) and
    write a note for each new or customized `cc-` entry (`section-library`
    step 4).
@@ -304,14 +327,54 @@ When `images` runs after pages are already built, it also sets those pages'
 image settings (`shopify-files` step 4). Don't retry
 the same failing command more than twice in a run.
 
-At the end, append to `build.runs` with the time and the status.
+At the end, append to `build.runs` with the time, the stage and the status.
+
+## One stage per run
+
+Each turn re-reads the whole context, so one long run that builds every page
+costs far more than several short ones. A run does **one stage**, then saves,
+reports and ends:
+
+| Stage | Steps | Load first (besides the preloaded skills) |
+|---|---|---|
+| `start` | `setup`, `push`, `storePages`, `menus`, `tokens`, `images` | `new-store-theme`, `shopify-pages`, `shopify-menus`, `shopify-files` |
+| `page` | one page from `pages`: the first that isn't `done` or `skipped` | `section-library`; also `shopify-files` if it sets image settings |
+| `finish` | `library`, `final` | `section-library` |
+
+- After **Resume** steps 1–4, run the first stage that still has a `pending`
+  or `in-progress` step. `blocked`, `failed`, `skipped` and `done` steps don't
+  hold a stage back: a `page` run goes ahead while `images` is blocked, as
+  **Order** allows.
+- In a `page` run, a page that already matched the design (added to **QA
+  later** without changes) doesn't count: go on to the next page in the same
+  run.
+- When every step is `done` or `skipped`, run `finish` anyway (**Resume**
+  step 6).
+- The `final` step's re-measure covers every built page, so a fix made in a
+  later `page` run that broke an earlier page is still caught.
+- If your task asks for the whole build in one run, do every stage in order.
+
+The run's status is `continue` when a later stage still has work that isn't
+blocked. Otherwise it's `done`, `done with gaps` or `stopped`.
 
 ## Report
 
-Your report is the only thing the user sees, so make it complete:
+Your report is the only thing the user sees.
+
+**A `continue` run** gives a short report, kept short because the main session
+keeps every report in its context:
+
+1. **Status**: `continue`, the stage, and which steps or page this run did.
+2. **This run**: per page built, its match counts (`measured`, `fixed`,
+   `remaining`); new decisions and new blocked steps, one line each.
+3. **Next**: `Use the store-builder agent: continue <project folder>`.
+
+**The last run** (status `done`, `done with gaps` or `stopped`) gives the full
+report below for the **whole build**, built from `.twin-dev.json` and
+`figma-build.md`, not only from this run:
 
 1. **Status**: done / done with gaps / stopped, in one line, with the reason.
-   For a resumed run, say which steps this run did.
+   Say which steps this run did.
 2. **Project**: theme name, folder path, base version, store, theme ID (target
    theme, or newly pushed with no update notices), preview
    and editor URLs.
@@ -327,8 +390,10 @@ Your report is the only thing the user sees, so make it complete:
    design ambiguities). Say they're saved and that a later run will keep them
    unless the user gives a different answer.
 7. **Merchant to-do** checklist (`- [ ]`): items linked to `#`, images that need
-   alt text, product and collection images, content missing from the design, and
-   the Instafeed app if you built an Instagram section.
+   alt text, product and collection images, content missing from the design,
+   the Instafeed app if you built an Instagram section, the Visit the Store
+   photo (with its Google Maps listing link), and any store address, opening
+   hours or 404 collection slot you couldn't fill.
 8. **Blocked**: each `blocked` or `failed` step with the exact command or input
    that unblocks it.
 9. **Next**: if anything is blocked, the line to run after fixing it:

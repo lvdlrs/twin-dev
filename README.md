@@ -45,7 +45,7 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 
 | Agent | Use |
 |---|---|
-| `store-builder` | Build or continue a store from Figma end to end, without asking questions: project folder, target or new unpublished theme, tokens, sections, menus, images. Runs the design-match loop on every page and reports the match counts, a **Manual fixes** list and the merchant to-do. Saves its progress and decisions in `.twin-dev.json` and resumes from there. Run `qa-checker` after it. |
+| `store-builder` | Build or continue a store from Figma end to end, without asking questions: project folder, target or new unpublished theme, tokens, sections, menus, images. Runs the design-match loop on every page and reports the match counts, a **Manual fixes** list and the merchant to-do. Saves its progress and decisions in `.twin-dev.json` and resumes from there. Each run does one stage (setup to pages, one page, or menus and the final check), and Claude starts the next run until the build is done, so no single run's context grows large. Run `qa-checker` after it. |
 | `theme-reviewer` | Review changed Liquid/schema/CSS/JS before pushing. |
 | `theme-explorer` | Find where something is rendered, styled or configured. |
 | `accessibility-auditor` | WCAG 2.2 AA audit of sections and components. |
@@ -82,6 +82,21 @@ are saved to `.twin-dev.json`, so a later run only needs the store name.
 
 For a new store, run `/twin-dev:shopify-store-auth <store>.myshopify.com` first
 so the build doesn't stop for a login.
+
+A build runs in stages to keep token use down: `start` (setup, push, pages,
+menus, global settings, images), then one run per page, then `finish` (section
+library, final check and the full report). Pages are built in this order:
+header and footer, home, collection, product, 404, search, Visit the Store,
+then the other content pages. When the design has no frame for 404, search or
+Visit the Store, they get the standard setup:
+- **404**: home page text styles, plus a Collection List of Tops, Bottoms,
+  Accessories and Shoes.
+- **Search**: filtering and sorting off, and the collection page's product card.
+- **Visit the Store**: address and hours, a directions link and a map embed.
+  The photo is left for you to pick from the store's Google Maps listing. Every run's context starts small instead of
+growing for the whole build. Each run but the last ends with status `continue`
+and a short report, and Claude starts the next run on its own. To do it all in
+one run anyway, say "the whole build in one run".
 
 If a run ends with steps blocked (for example it needs store auth), fix what the
 report lists and run it again. It picks up from the first unfinished
@@ -141,6 +156,12 @@ so a page the build calls a match is also a match in QA:
    edited: those changes are listed as `manual` fixes for a developer.
 5. **Loop** until only `manual`, `content`, `theme limit` or `design`
    mismatches remain.
+
+The same file has the **Keep the context small** rules that every build and QA
+run follows. Each Figma node is read once and its spec reused. Screenshots are
+one per section per width, never full page, and each image is looked at once.
+Fix rounds compare numbers only. Long command output is filtered down to what's
+needed.
 
 ### Recurring store components
 

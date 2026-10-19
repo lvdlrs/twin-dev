@@ -124,7 +124,8 @@ files were available, and where each came from.
 
 ## 1. Code health
 
-- Run `shopify theme check` if the CLI is installed; summarise errors and warnings.
+- Run `shopify theme check` if the CLI is installed; summarise errors and
+  warnings. Print counts and the offending lines, not the full output.
 - Search for leftovers: `console.log`, `debugger`, `TODO`, `FIXME`, `lorem ipsum`,
   `placeholder`, `test`, `example.com`, hardcoded `*.myshopify.com` URLs, hardcoded
   prices or currency symbols, commented-out blocks of code.
@@ -216,8 +217,13 @@ missing link under **Need from you**.
 
 For each frame, top to bottom:
 
-1. `get_screenshot` the Figma frame, and take a full-page screenshot of the
-   preview at the same width. Line the two up section by section and list:
+1. Look at the Figma section and the same preview section at the same width,
+   one section at a time: the image `get_design_context` returns for the
+   section node (or one `get_screenshot` of it), and a viewport screenshot of
+   the preview section scrolled to the top. Don't take full-page screenshots,
+   and don't `Read` a screenshot file the tool already showed you. Follow
+   **Keep the context small** in `design-match.md` (below) for every Figma,
+   browser and shell call. Compare them and list:
    - missing, extra or reordered sections and blocks;
    - elements that are visible in one and not the other (badges, icons, arrows,
      dividers, labels, pagination dots).

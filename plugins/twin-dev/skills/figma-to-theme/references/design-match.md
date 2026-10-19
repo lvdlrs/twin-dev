@@ -8,6 +8,37 @@ spacing, font size, font weight), plus layout, components, images, copy and
 designed states. Get there in one build run: write the spec, build, measure,
 fix, and measure again, without waiting for a person.
 
+## Keep the context small
+
+Every turn of a run re-reads everything already in its context, so each
+screenshot and long output is paid for again on every later turn. Measured
+numbers decide a match, so spend the context on them, not on pictures.
+
+- **Look at each image once.** Use the image a tool returns. Don't `Read` a
+  screenshot file the tool already showed you, and don't open an image again
+  later in the run.
+- **Screenshot a section, never a full page.** Scroll the section to the top of
+  the viewport and take a viewport screenshot (`scale: "css"`, no `fullPage`).
+  If the page scrolls inside a wrapper instead of the window (Horizon 4.3's
+  `.page-wrapper`), scroll that element. Take a second one only when the
+  section is taller than the viewport.
+- **When to screenshot:** once per section and width, on its first
+  measurement, to check its structure; and once more in a final check. Fix
+  rounds compare measured numbers only.
+- **Figma:** call `get_design_context` once per section node, when you write
+  its spec, never on a whole page. When it returns an image of the node, that's
+  the section's Figma screenshot: don't also call `get_screenshot` for it. After
+  that, the spec in `figma-build.md` replaces both for later rounds and runs.
+- **Browser:** find elements with `browser_evaluate`, not `browser_snapshot`
+  (it returns the whole accessibility tree).
+- **Command output:** print only what you'll use. Filter long output down to
+  errors, counts and the lines you need (`| tail -n 30`, `grep`, or a
+  `node -e` that prints selected keys). Never print a whole
+  `settings_schema.json`, `settings_data.json`, template or section schema:
+  query the keys you need (`theme-inventory.mjs --detail <type>`).
+- **Don't re-read** a file you just wrote, or one you read earlier in the run
+  that hasn't changed.
+
 ## 1. Section spec (before building)
 
 For each Figma section, call `get_design_context` on the section node (on its
@@ -32,6 +63,10 @@ mobile values in the same row when the section has a mobile frame.
   ExtraBold 800, Black 900).
 - If the desktop frame isn't 1440 wide, scale its values to 1440 (see
   `figma-to-theme` step 2).
+- Under the table, add a **Layout** line: the elements in visual order, the
+  columns, and what's visible only on desktop or mobile
+  (`heading · text · 2 buttons in a row | image right, 50% · mobile: image first`).
+  The structure check in step 2 compares against it.
 - Keep the spec in `figma-build.md` under the page. The build uses it as the
   target, and a resumed run reads it instead of calling Figma again.
 
@@ -44,9 +79,10 @@ width (390 if there's no mobile frame).
   the preview bar. Local dev server: use its paths.
 - Wait for fonts and lazy images: scroll to the bottom and back, wait for network
   idle, and close cookie banners or popups that aren't in the design.
-- Screenshot the section and check it against `get_screenshot` of the frame for
-  missing, extra or reordered elements. Screenshots can't tell 16px from 17px,
-  so take every value from the measurement below.
+- On a section's first measurement, screenshot it (see **Keep the context
+  small**) and check it against the spec's **Layout** line and the Figma image
+  for missing, extra or reordered elements. Screenshots can't tell 16px from
+  17px, so take every value from the measurement below.
 
 Measure each section with one `browser_evaluate` call (Playwright), or the same
 script in another browser tool. Pass the section's id from the template
@@ -61,23 +97,43 @@ script in another browser tool. Pass the section's id from the template
     return '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase() + (a < 1 ? ` ${Math.round(a * 100)}%` : '');
   };
   const sr = root.getBoundingClientRect();
-  const els = [root, ...root.querySelectorAll('h1,h2,h3,h4,h5,h6,p,a,button,input,select,label,span,li,img,svg,picture,video,[class*="button"],[class*="card"],[class*="badge"],[class*="price"],.group-block,.text-block')]
+  const els = [root, ...root.querySelectorAll('h1,h2,h3,h4,h5,h6,p,a,button,input,select,textarea,label,span,li,img,svg,picture,video,[class*="button"],[class*="card"],[class*="badge"],[class*="price"],.group-block,.text-block')]
     .filter((el) => { const r = el.getBoundingClientRect(); return r.width && r.height && getComputedStyle(el).visibility !== 'hidden'; });
+  const put = (o, k, v, defaults) => { if (v && !defaults.includes(v)) o[k] = v; };
   return els.map((el, i) => {
-    const s = getComputedStyle(el), r = el.getBoundingClientRect();
+    const s = getComputedStyle(el), r = el.getBoundingClientRect(), tag = el.tagName.toLowerCase();
     const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
-    return {
-      i, tag: el.tagName.toLowerCase(), cls: el.className?.baseVal ?? el.className,
-      text: own ? el.textContent.trim().slice(0, 60) : undefined,
-      x: Math.round(r.left - sr.left), y: Math.round(r.top - sr.top), w: Math.round(r.width), h: Math.round(r.height),
-      color: hex(s.color), bg: hex(s.backgroundColor), border: `${s.borderTopWidth} ${s.borderTopStyle} ${hex(s.borderTopColor)}`,
-      font: s.fontFamily.split(',')[0], size: s.fontSize, weight: s.fontWeight, lh: s.lineHeight, ls: s.letterSpacing, tt: s.textTransform, ta: s.textAlign,
-      pad: s.padding, gap: s.gap, radius: s.borderRadius, shadow: s.boxShadow !== 'none' ? s.boxShadow : undefined,
-      fit: s.objectFit, ar: s.aspectRatio, op: s.opacity !== '1' ? s.opacity : undefined,
+    const o = {
+      i, tag, cls: String(el.className?.baseVal ?? el.className).trim().split(/\s+/).slice(0, 3).join(' '),
+      box: [r.left - sr.left, r.top - sr.top, r.width, r.height].map(Math.round),
     };
+    if (own || ['input', 'select', 'textarea'].includes(tag)) Object.assign(o, {
+      text: own ? el.textContent.trim().slice(0, 60) : undefined,
+      color: hex(s.color), font: s.fontFamily.split(',')[0], size: s.fontSize, weight: s.fontWeight,
+      lh: s.lineHeight, ls: s.letterSpacing, tt: s.textTransform, ta: s.textAlign,
+    });
+    else if (tag === 'svg') o.color = hex(s.color);
+    put(o, 'bg', hex(s.backgroundColor), ['#000000 0%']);
+    if (parseFloat(s.borderTopWidth)) o.border = `${s.borderTopWidth} ${s.borderTopStyle} ${hex(s.borderTopColor)}`;
+    put(o, 'pad', s.padding, ['0px']);
+    put(o, 'gap', s.gap, ['normal', 'normal normal', '0px']);
+    put(o, 'radius', s.borderRadius, ['0px']);
+    put(o, 'shadow', s.boxShadow, ['none']);
+    if (tag === 'img' || tag === 'video') o.fit = s.objectFit;
+    put(o, 'ar', s.aspectRatio, ['auto']);
+    put(o, 'op', s.opacity, ['1']);
+    return o;
   });
 }
 ```
+
+The output leaves out defaults to stay short: no `bg` means transparent, no
+`border` means none, and no `pad`, `gap` or `radius` means 0. `box` is
+`[x, y, w, h]` relative to the section. Type values (`color`, `font`, `size`,
+`weight`, `lh`, `ls`, `tt`, `ta`) are only on the element that holds the text,
+and on inputs. So a button's font is on the element with its label text, and
+its padding, background and border are on the button. An `svg` gets its
+`color` for the icon colour.
 
 Also check `document.fonts` for every family and weight the spec uses. A
 missing weight file makes the browser fake bold or use the nearest weight, but
@@ -166,9 +222,9 @@ change or remove existing rules, settings or defaults.
 For each section, at desktop and then mobile width:
 
 1. Write the spec, build, push the changed files (`shopify-theme-deploy`) or
-   use `shopify theme dev`, then measure.
+   use `shopify theme dev`, then measure and take the section's screenshot.
 2. List the mismatches and apply the fix ladder to every one of them.
-3. Push, measure again, and repeat.
+3. Push, measure again (numbers only, no new screenshot), and repeat.
 
 Stop a section when every remaining mismatch is labelled `manual`, `content`,
 `theme limit` or `design`. Also stop when two rounds in a row fix nothing:
