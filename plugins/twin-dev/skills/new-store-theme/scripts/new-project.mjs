@@ -7,7 +7,8 @@
 //                        [--figma <figma.com link>] [--theme-id <id>] [--dry-run]
 //
 //   --store    Store / brand name as the client writes it (required)
-//   --base     Base theme folder. Defaults to $TWIN_DEV_BASE_THEME.
+//   --base     Base theme folder. Defaults to $TWIN_DEV_BASE_THEME, then `baseTheme` in
+//              ~/.claude/twin-dev/config.json.
 //   --dest     Parent directory for the new folder. Defaults to $TWIN_DEV_PROJECTS_DIR,
 //              then `projectsDir` in ~/.claude/twin-dev/config.json.
 //   --short    Abbreviation to use when the full theme name is over 50 characters.
@@ -41,9 +42,7 @@ const args = parseArgs(process.argv.slice(2));
 const storeName = (args.store || "").trim();
 if (!storeName) fail('Pass --store "<Store name>".', 2);
 
-const base = args.base || process.env.TWIN_DEV_BASE_THEME;
-if (!base) fail("Pass --base <path> or set TWIN_DEV_BASE_THEME to the base theme folder.", 2);
-const baseTheme = resolve(base);
+const baseTheme = resolveBaseTheme(args.base);
 
 const schemaPath = join(baseTheme, "config", "settings_schema.json");
 if (!existsSync(schemaPath)) fail(`Not a theme folder (missing config/settings_schema.json): ${baseTheme}`);
@@ -144,12 +143,22 @@ function parseArgs(argv) {
   return out;
 }
 
+// --base, then $TWIN_DEV_BASE_THEME, then `baseTheme` in ~/.claude/twin-dev/config.json.
+function resolveBaseTheme(flag) {
+  const dir = flag || process.env.TWIN_DEV_BASE_THEME || readConfig().baseTheme;
+  if (!dir) fail(`No base theme folder. Pass --base <path>, set TWIN_DEV_BASE_THEME, or add {"baseTheme": "<path>"} to ${CONFIG_PATH}.`, 2);
+  return resolve(dir);
+}
+
 // --dest, then $TWIN_DEV_PROJECTS_DIR, then `projectsDir` in ~/.claude/twin-dev/config.json.
 function resolveProjectsDir(flag) {
-  let dir = flag || process.env.TWIN_DEV_PROJECTS_DIR;
-  if (!dir && existsSync(CONFIG_PATH)) dir = JSON.parse(readFileSync(CONFIG_PATH, "utf8")).projectsDir;
+  const dir = flag || process.env.TWIN_DEV_PROJECTS_DIR || readConfig().projectsDir;
   if (!dir) fail(`No projects folder. Pass --dest <dir>, set TWIN_DEV_PROJECTS_DIR, or add {"projectsDir": "<dir>"} to ${CONFIG_PATH}.`, 2);
   return resolve(dir);
+}
+
+function readConfig() {
+  return existsSync(CONFIG_PATH) ? JSON.parse(readFileSync(CONFIG_PATH, "utf8")) : {};
 }
 
 function fail(message, code = 1) {

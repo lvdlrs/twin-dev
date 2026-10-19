@@ -107,8 +107,19 @@ reuse them. Each entry is marked `base` (same as the base theme at the version
 that store started from), `customized` (a base section changed for that client)
 or `custom` (built only for that client), with the store's base version.
 
-Index past projects once (needs `TWIN_DEV_BASE_THEME` pointing at the base
-theme's git repo, so each store is compared with the right base version):
+Index past projects once. It needs the base theme's git repo so each store is
+compared with the right base version: each project's `.twin-dev.json` records
+the `baseTheme` it was copied from, and the default for this computer is
+`baseTheme` in `~/.claude/twin-dev/config.json` (or `$TWIN_DEV_BASE_THEME`):
+
+```json
+{
+  "projectsDir": "D:/path/to/Projects",
+  "baseTheme": "D:/path/to/capital-horizon-theme"
+}
+```
+
+Then:
 
 ```
 node plugins/twin-dev/skills/section-library/scripts/library.mjs scan

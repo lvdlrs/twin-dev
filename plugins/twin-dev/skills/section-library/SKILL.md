@@ -82,7 +82,9 @@ Index every past project in the projects folder:
 node .../library.mjs scan
 ```
 
-It needs the base theme (`$TWIN_DEV_BASE_THEME` or `--base`) as a git repo to
+It needs the base theme as a git repo (`--base`, else the project's `baseTheme`
+in `.twin-dev.json`, else `$TWIN_DEV_BASE_THEME`, else `baseTheme` in
+`~/.claude/twin-dev/config.json`) to
 tell `base` from `customized` per version; without git it compares with the
 current base only, and without a base every file counts as `custom`. Then look
 through `index.md` in the library and add notes to the `customized` and `custom`
@@ -125,7 +127,7 @@ three-way merge, using the base file at the entry's `baseRef` as the common
 ancestor:
 
 ```bash
-git -C "$TWIN_DEV_BASE_THEME" show <baseRef>:<path> > <scratch>/ancestor
+git -C "<base theme folder>" show <baseRef>:<path> > <scratch>/ancestor
 git merge-file -p <project>/<path> <scratch>/ancestor <library>/<store>/<path> > <scratch>/merged
 ```
 

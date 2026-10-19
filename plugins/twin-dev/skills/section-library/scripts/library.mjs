@@ -12,6 +12,11 @@
 //            config/settings_schema.json). Defaults to $TWIN_DEV_PROJECTS_DIR, then
 //            `projectsDir` in ~/.claude/twin-dev/config.json.
 //   add      Index one project folder (run after a build).
+//
+//   The base theme is --base, else the project's `baseTheme` in .twin-dev.json (when
+//   that folder exists on this computer), else $TWIN_DEV_BASE_THEME, else `baseTheme`
+//   in ~/.claude/twin-dev/config.json.
+//
 //   search   Rank entries by the words, matched against file, name, presets,
 //            settings, blocks, store and notes.
 //   show     Print one entry and where its saved files are.
@@ -35,6 +40,8 @@ import { basename, dirname, join, resolve } from "node:path";
 
 const CONFIG_PATH = join(homedir(), ".claude", "twin-dev", "config.json");
 const CC_DIRS = ["sections", "blocks", "snippets", "assets"];
+// Opened base themes by folder, so a scan reads each one's git history once.
+const bases = new Map();
 
 const [command, ...rest] = process.argv.slice(2);
 const { args, words } = parseArgs(rest);
@@ -50,8 +57,7 @@ switch (command) {
       .map((d) => join(projectsDir, d.name))
       .filter(isTheme);
     const index = loadIndex();
-    const base = openBase(args.base);
-    for (const folder of folders) indexProject(index, folder, base);
+    for (const folder of folders) indexProject(index, folder, baseFor(folder));
     saveIndex(index);
     console.log(`Indexed ${folders.length} projects, ${index.entries.length} entries → ${libraryDir}`);
     break;
@@ -61,7 +67,7 @@ switch (command) {
     const folder = resolve(args.project);
     if (!isTheme(folder)) fail(`Not a theme folder (missing config/settings_schema.json): ${folder}`);
     const index = loadIndex();
-    const added = indexProject(index, folder, openBase(args.base));
+    const added = indexProject(index, folder, baseFor(folder));
     saveIndex(index);
     console.log(JSON.stringify(added.map(summary), null, 2));
     break;
@@ -170,11 +176,21 @@ function collectDeps(folder, file, seen) {
 
 // ---------- base theme ----------
 
-function openBase(path) {
-  const root = path || process.env.TWIN_DEV_BASE_THEME;
+function baseFor(folder) {
+  const own = (readJson(join(folder, ".twin-dev.json")) || {}).baseTheme;
+  const root = args.base
+    || (own && existsSync(own) ? own : null)
+    || process.env.TWIN_DEV_BASE_THEME
+    || readConfig().baseTheme;
+  const key = root ? resolve(root) : "";
+  if (!bases.has(key)) bases.set(key, openBase(key));
+  return bases.get(key);
+}
+
+function openBase(root) {
   const none = { refFor: () => null, read: () => null };
   if (!root || !existsSync(join(root, "config", "settings_schema.json"))) {
-    console.error("No base theme (pass --base or set TWIN_DEV_BASE_THEME): every cc- file will be marked custom.");
+    console.error(`No base theme (pass --base, set TWIN_DEV_BASE_THEME, or add {"baseTheme": "<path>"} to ${CONFIG_PATH}): every cc- file will be marked custom.`);
     return none;
   }
   const isGit = tryGit(root, ["rev-parse", "--is-inside-work-tree"]) === "true";
@@ -381,10 +397,13 @@ function parseArgs(argv) {
 
 // --flag, then $TWIN_DEV_PROJECTS_DIR, then `projectsDir` in ~/.claude/twin-dev/config.json.
 function resolveProjectsDir(flag) {
-  let dir = flag || process.env.TWIN_DEV_PROJECTS_DIR;
-  if (!dir && existsSync(CONFIG_PATH)) dir = JSON.parse(readFileSync(CONFIG_PATH, "utf8")).projectsDir;
+  const dir = flag || process.env.TWIN_DEV_PROJECTS_DIR || readConfig().projectsDir;
   if (!dir) fail(`No projects folder. Pass --projects <dir>, set TWIN_DEV_PROJECTS_DIR, or add {"projectsDir": "<dir>"} to ${CONFIG_PATH}.`, 2);
   return resolve(dir);
+}
+
+function readConfig() {
+  return existsSync(CONFIG_PATH) ? JSON.parse(readFileSync(CONFIG_PATH, "utf8")) : {};
 }
 
 function fail(message, code = 1) {

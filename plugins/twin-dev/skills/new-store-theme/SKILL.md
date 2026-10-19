@@ -64,7 +64,7 @@ Collect these before you start. Ask for anything that's missing; never guess it.
 |---|---|
 | Store name | As the client writes it, for example `Acme Coffee Co`. |
 | Figma link | `figma.com/design/...`, this store's design. It can come later, but step 4 needs it. |
-| Base theme folder | `$TWIN_DEV_BASE_THEME`, or ask. Suggest setting the env var so you don't have to ask next time. |
+| Base theme folder | `--base`, else `$TWIN_DEV_BASE_THEME`, else `baseTheme` in `~/.claude/twin-dev/config.json`. Don't ask unless the script says none is set; then ask once and save the answer to that config file so it's remembered on this computer. |
 | Store domain | `<store>.myshopify.com`, needed for the push. |
 | Target theme ID | Optional. An existing **unpublished** theme to build into, normally Horizon added from the Theme Store (see below). Ask for it once; if the user has none, push a new theme. |
 | Projects folder | `--dest`, else `$TWIN_DEV_PROJECTS_DIR`, else `projectsDir` in `~/.claude/twin-dev/config.json`. Don't ask unless the script says none is set; then ask once and save the answer to that config file so it's remembered on this computer. |
