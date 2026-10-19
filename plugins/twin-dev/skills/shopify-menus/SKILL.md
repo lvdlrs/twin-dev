@@ -215,6 +215,30 @@ template, and the `link_list` setting IDs in those schemas.
   settings; if the user wants it done in code, follow `/twin-dev:shopify-theme-deploy`.
 - In Liquid, menus are read with `linklists['<handle>']` or a `link_list` setting.
 
+### Mobile quick links
+
+A single row of short links to collections or pages directly under the header
+is a quick links menu, not part of the main menu. It can be text, pills or
+buttons, and is usually only in the mobile frame (for example
+`NEW · DRESSES · TOPS · SALE`). Each store styles it differently, so take the
+look from this store's frame:
+
+1. Create a menu titled `Momentum - Mobile Quick Links`
+   (`momentum-mobile-quick-links`) with those links, in the same order, linked
+   to their collections or pages (`#` when missing).
+2. Add the `cc-header-quick-links` section to `sections/header-group.json` right
+   after the header section, and set:
+   - `menu`: `momentum-mobile-quick-links`;
+   - `show_on_mobile` / `show_on_desktop`: on for each viewport whose frame
+     shows the row (usually mobile only);
+   - `layout_type`: `carousel` (always, so the row scrolls sideways when the
+     links don't fit);
+   - `link_style`: `text`, or `button` for pills and buttons (with their
+     colours, border, radius and padding); `icons_style`: `none` unless the
+     design shows arrows;
+   - `columns_gap` from the gap between the links, and the font, size, weight,
+     letter spacing, case and colour from the frame's text.
+
 ## 5. Report
 
 - store and menu (title, handle, ID), created or updated;

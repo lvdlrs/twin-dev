@@ -114,6 +114,7 @@ root file, so Shopify CLI never uploads it. Keep the other keys as they are.
   ],
   "imagesDir": "D:/.../Acme Coffee Co x Horizon 3.1.0-images",
   "menus": { "Momentum - Main menu": "momentum-main-menu" },
+  "match": { "index": { "measured": 214, "fixed": 37, "remaining": 3 } },
   "runs": [ { "at": "2026-10-16T09:12:00Z", "status": "done with gaps" } ]
 }
 ```
@@ -188,6 +189,12 @@ When `build` already exists:
 - Upload new images to Shopify Files.
 - Apply the design's tokens to `config/settings_data.json`, set image settings
   and links in the project's templates, and build `cc-` sections and blocks.
+- Fix design mismatches with the fix ladder in `figma-to-theme`'s
+  `references/design-match.md`. That includes adding CSS to a `cc-` section or
+  block's own `{% stylesheet %}` tag, and adding new settings (never renaming
+  or removing existing ones) to `cc-` section and block schemas. Never edit a
+  stock (non-`cc-`) file to fix a mismatch: list it as a `manual` fix.
+- Push the project's theme as often as the design-match loop needs.
 - Load a free Google Font for a brand font that isn't in the Shopify font
   library (see **Decisions**).
 
@@ -223,10 +230,20 @@ Save each one to `build.decisions` (step, topic, choice, why) as you make it.
 - **Brand font not in the Shopify font library**: load it from Google Fonts if
   it's there. If it isn't, use the closest font in the Shopify library (same
   classification, similar width and x-height).
-- **Instagram section**: build it from the `section` **Instafeed** preset
-  (`cc-instafeed` block), never as images or a new `cc-` section, and don't
-  download or upload its post images: the Instafeed app pulls them from
-  Instagram. Add "install and connect the Instafeed app" to the merchant to-do.
+- **Recurring store components**: designs differ per store, so recognise these
+  by what they do and where they sit, not by how one design draws them. Build
+  them as `figma-to-theme` "Recurring store components" says, styled from this
+  store's frame:
+  - **Quick links bar**: the `cc-header-quick-links` section, always a
+    carousel, with its own menu.
+  - **Purchase benefits / USPs**: the `product-usp` block. A stock row always
+    has `tie_to_inventory` on and `set_threshold` off.
+  - **Stock alert**: reuse a product block that can match the design.
+    Otherwise create a `cc-` block that is tied to inventory and shows only at
+    or below its threshold. Record which one you used as a decision.
+  - **Instagram feed**: the Instafeed preset (`cc-instafeed`). Never download
+    or upload its post images, and add "install and connect the Instafeed app"
+    to the merchant to-do.
 - **Missing resources** (page, collection, product): link to `#` and list it.
 - **Ambiguous design** (unclear component, missing state, conflicting frames):
   choose the option closest to the desktop frame, then the theme default.
@@ -257,13 +274,29 @@ Each step's key in `build.steps` is in brackets.
    closest match; record which entry you used as a decision. Add every page in scope to
    `build.steps.pages` as `pending` first, keyed by template name. Content pages
    use the names in `pages` (from `storePages`).
+
+   Each page goes through the design-match loop in `figma-to-theme`'s
+   `references/design-match.md`: spec each section from Figma, build it with the
+   theme's settings first, measure it in the browser at the frame widths, and
+   fix every mismatch with the fix ladder until only `manual`, `content`, `theme limit`
+   or `design` mismatches are left. A page is `done` only after that loop. If
+   no browser tool is available, mark it `done` with "not measured" in
+   `build.decisions`, and the report says the design match is unchecked. Save
+   each page's match counts to `build.match.<template>` (`measured`, `fixed`,
+   `remaining`).
 7. [`menus`] Create the menus and set them in the header and footer
-   (`shopify-menus`). Save each created handle to `build.menus`.
+   (`shopify-menus`). Save each created handle to `build.menus`. If the design
+   has a quick links bar under the header, create
+   `Momentum - Mobile Quick Links` and set it on the `cc-header-quick-links`
+   section, as `shopify-menus` "Mobile quick links" describes.
 8. [`library`] Add the project to the section library (`library.mjs add`) and
    write a note for each new or customized `cc-` entry (`section-library`
    step 4).
 9. [`final`] Run `shopify theme check` again, fix the errors, and push to the
-   project's theme ID.
+   project's theme ID. Then re-measure the first section of every built page
+   and the header and footer (design-match step 2). Later global fixes can
+   break earlier pages, so fix any new mismatch with the ladder before you
+   report.
 
 If a step fails or is blocked, finish every step that doesn't depend on it.
 Pages can be built before `images` is done: leave their image settings empty.
@@ -282,18 +315,24 @@ Your report is the only thing the user sees, so make it complete:
 2. **Project**: theme name, folder path, base version, store, theme ID (target
    theme, or newly pushed with no update notices), preview
    and editor URLs.
-3. **Built**: per page, its sections and the `cc-` files you created.
-4. **Store changes**: pages created or assigned a template, templates added to
+3. **Built**: per page, its sections and the `cc-` files you created, and its
+   design match: elements measured, mismatches fixed, and the ones left with
+   their label (`manual`, `content`, `theme limit`, `design`).
+4. **Manual fixes**: every `manual` item from `figma-build.md` (element, Figma
+   vs live value, stock file that owns the style, suggested change), for the
+   developer to apply by hand.
+5. **Store changes**: pages created or assigned a template, templates added to
    the live theme, menus created (title, handle, item tree) and files uploaded.
-5. **Decisions you made** in place of asking (token choices, font substitutes,
+6. **Decisions you made** in place of asking (token choices, font substitutes,
    design ambiguities). Say they're saved and that a later run will keep them
    unless the user gives a different answer.
-6. **Merchant to-do** checklist (`- [ ]`): items linked to `#`, images that need
+7. **Merchant to-do** checklist (`- [ ]`): items linked to `#`, images that need
    alt text, product and collection images, content missing from the design, and
    the Instafeed app if you built an Instagram section.
-7. **Blocked**: each `blocked` or `failed` step with the exact command or input
+8. **Blocked**: each `blocked` or `failed` step with the exact command or input
    that unblocks it.
-8. **Next**: if anything is blocked, the line to run after fixing it:
+9. **Next**: if anything is blocked, the line to run after fixing it:
    `Use the store-builder agent: continue <project folder>` plus any answers.
    If everything is done, suggest running the `qa-checker` agent with the
-   preview URL and Figma link.
+   preview URL and Figma link as an independent check; it uses the same
+   design-match standard.

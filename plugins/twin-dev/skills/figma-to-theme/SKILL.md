@@ -190,10 +190,12 @@ How to convert Figma values to this theme:
 - **Line heights** are presets, not numbers. Pick the closest: headings
   `display-tight` 1.0, `display-normal` 1.1, `display-loose` 1.2; paragraph and
   buttons `body-tight` 1.2, `body-normal` 1.4, `body-loose` 1.6. Figma gives line
-  height in px or %, so divide by the font size first, and list any value more
-  than 0.1 away from a preset as a difference.
+  height in px or %, so divide by the font size first. For a value more than
+  0.1 away from a preset, set the closest preset and fix the exact value with
+  the fix ladder in `references/design-match.md` (step 4).
 - **Letter spacing** is in px, 0–10 in 0.1 steps. Convert Figma % to px
-  (`size × % / 100`). Negative tracking can't be set: use 0 and list it.
+  (`size × % / 100`). Negative tracking can't be set: use 0 and fix it with the
+  fix ladder (a global value with no theme setting is a `manual` item).
 - **Weights**: button and badge weights are a select (100, 300, 400, 500, 600,
   700, 900; variant text 400–700). Round to the nearest option. Heading and body
   weights come from the font handle (`_n4`, `_n7`), not a separate setting.
@@ -204,7 +206,7 @@ How to convert Figma values to this theme:
   width; a 1440 Figma frame is usually `narrow`.
 - **Radii and border widths** are ranges with their own limits (button radius
   0–100, inputs 0–32, cards 0–16, popovers 0–16, button/input borders 0–4). Clamp
-  to the range and list anything clamped.
+  to the range, then fix the exact value with the fix ladder.
 - **Desktop and mobile values.** The base theme scales every desktop/mobile pair
   (type sizes, gaps, custom widths, spacers) linearly from the mobile value at
   375px to the desktop value at 1440px (`snippets/cc-fluid-value.liquid`). Take
@@ -219,7 +221,7 @@ How to convert Figma values to this theme:
   If one extra style repeats across many sections, ask whether it should take a
   heading slot instead.
 - **Shadows** only exist for popovers (`popover_drop_shadow`) and layered
-  slides. List any other designed shadow as a difference.
+  slides. Add any other designed shadow with the fix ladder.
 - Check contrast for every text/background and button pair (4.5:1 body text, 3:1
   large text and UI). Flag failing pairs from the design rather than silently
   changing them.
@@ -303,6 +305,83 @@ stays local.
   settings in step 3. Check any state frames (cart drawer, mega menu, mobile
   menu) against them.
 
+### Recurring store components
+
+Most store designs include the components below, but each store styles them
+differently: other wording, icons, colours, layout, and boxed or plain.
+Recognise them by **what they do and where they sit**, not by how one design
+draws them or what its layers are called. The examples come from past
+designs. Always take the styling from this store's frame (spec and fix ladder
+in `references/design-match.md`). The rule here only decides which theme
+component to use and how it behaves.
+
+- **Quick links bar.** A single row of short links to collections or pages,
+  directly under the header: text, pills or buttons (`NEW · DRESSES · TOPS ·
+  SALE`). Usually only in the mobile frame.
+  - Build it with the `cc-header-quick-links` section in the header group,
+    right after the header, with its own `Momentum - Mobile Quick Links` menu
+    (`shopify-menus`, "Mobile quick links").
+  - `layout_type` is always `carousel`.
+  - `show_on_mobile` / `show_on_desktop` follow the frames that show it.
+  - `link_style` is `text` or `button`, to match the design.
+- **Product purchase benefits (USPs).** Icon + short text rows near the buy
+  buttons: stock, shipping, pickup, returns, guarantees. Examples: "In Stock,
+  Ready To Ship", "Store Pickup Available", "Free returns".
+  - Use the `product-usp` block with one `_product-usp-item` per row, in the
+    design's order, not a new `cc-` block.
+  - Set `columns` to match the layout (2 when rows sit side by side), each
+    row's `text` from the design, and its `icon` from the block's icon list,
+    or `image_upload` when none fits.
+  - Only keep the preset's rows that the design shows, and skip rows in the
+    frame that have an icon but no text.
+  - A **stock row** (in stock, ready to ship, available now) always has
+    `tie_to_inventory: true` and `set_threshold: false`. It then shows only
+    while the selected variant is in stock and hides when it's sold out.
+  - A **low-stock row** ("Only 3 left") is `tie_to_inventory: true`,
+    `set_threshold: true` with the design's or the default threshold, and
+    `||quantity||` in place of the number.
+- **Stock alert.** A low-stock or urgency message on the product page
+  ("Low in stock — only 4 left", "Selling fast"), plain or in a box. It always
+  depends on the selected variant's inventory and shows only at or below a
+  threshold.
+  1. Look for a product block that already does it: this theme's blocks in
+     the inventory (`_product-usp-item` with `tie_to_inventory` and
+     `set_threshold`, `product-inventory`, any `cc-` stock block), then the
+     `section-library`. Use it if its settings can produce the design (text,
+     icon, colours, box, border, radius, padding). `product-inventory` always
+     shows a status and uses fixed text, so it only fits a design that does the
+     same.
+  2. If none fits, create a `cc-` product block (for example
+     `blocks/cc-stock-alert.liquid`) with the `horizon-theme` skill. It must:
+     - be tied to inventory by default (`tie_to_inventory: true`), with an
+       `inventory_threshold` setting (the design's number, else 10);
+     - show only when the selected variant tracks inventory and its quantity
+       is above 0 and at or below the threshold; hide it when the variant is
+       sold out, above the threshold, or doesn't track inventory;
+     - take its text from a setting with a `||quantity||` token for the number
+       (`Low in stock — only ||quantity|| left`);
+     - have settings for the icon (icon list or `image_upload`), text,
+       background and border colours, radius, padding and typography, with the
+       design's values as defaults and in its preset;
+     - update when the variant changes. Follow how `_product-usp-item` does it
+       (a stable `id` keyed to `block.id` and the `cc-product-usp.js` morph),
+       and check by switching between a low-stock and an in-stock variant.
+  3. Place it where the design shows it inside the product details, and
+     record the new block in the section library.
+- **Instagram feed.** A grid or row of Instagram posts, usually with an
+  `@handle` or a "Follow us" heading.
+  - Use the `section` **Instafeed** preset, whose `cc-instafeed` block is the
+    mount point for the Instafeed app. Copy the preset's block structure, put
+    the design's heading and handle in its `header` group, and set the block's
+    `dgap` / `mgap` from the grid's gaps.
+  - Don't build the posts as images or a new `cc-` section, and don't download
+    or upload the post images: the app pulls them from Instagram.
+  - List "install and connect the Instafeed app" for the merchant.
+
+When a design repeats a component that isn't on this list, and it's the same
+kind of thing across stores (a size guide link, a delivery estimate, a
+payment icons row), log it as a gap. `improve-skills` can then add it here.
+
 ### Skip pages that already match
 
 Before building a page, check whether the downloaded theme already matches it:
@@ -313,8 +392,9 @@ Before building a page, check whether the downloaded theme already matches it:
    blocks and content, and layout settings (spacing, alignment, width, columns)
    that fit the design. Global tokens were already applied in step 3, so judge
    colours and fonts through those.
-3. If a browser tool and a preview URL are available, screenshot the page at
-   1440px and 390px and compare it with the desktop and mobile frames.
+3. If a browser tool and a preview URL are available, measure the page against
+   its spec (`references/design-match.md` steps 1–3). A page with any fixable
+   mismatch doesn't match: build it as below.
 
 If the page matches, don't touch its template. Add it to the **QA later** list
 with the template path, the Figma frame, and how you checked it (template only,
@@ -323,7 +403,11 @@ or you can't tell, build the page as below.
 
 ### Build the page
 
-List the page's sections from top to bottom and match each one to an existing
+Read `references/design-match.md` first. Every section is built against an
+exact spec and checked by measuring it, and that file covers both.
+
+First, write the spec for each section of the page (design-match step 1). Then
+list the page's sections from top to bottom and match each one to an existing
 section + blocks from the inventory. Look at the presets first: a section's
 presets (for example "Image with text", "FAQ", "Products carousel") are often an
 exact match for a Figma section. Write the mapping out like this:
@@ -351,17 +435,16 @@ exact match for a Figma section. Write the mapping out like this:
   global token; `custom` only for the extra styles listed in step 2.
 - Buttons: `style_class` `button` / `button-secondary` when they match the global
   button tokens; `button-custom` only for one-off buttons.
-- **Instagram feed** (a grid or row of Instagram posts, often with an
-  `@handle` or "Follow us" heading): use the `section` **Instafeed** preset, whose
-  `cc-instafeed` block is the mount point for the Instafeed app. Copy the preset's
-  block structure, put the design's heading and handle in its `header` group, and
-  set the block's `dgap` / `mgap` from the grid's gaps. Don't build the posts as
-  images or a new `cc-` section, and don't download or upload the post images:
-  the app pulls them from Instagram. List "install and connect the Instafeed app"
-  for the merchant.
-- Only create a new section, block, snippet or asset when no existing one can do
-  it. Name it with a `cc-` prefix (`sections/cc-feature-banner.liquid`) and follow
-  the `horizon-theme` skill when you do.
+- Components in **Recurring store components** (quick links bar, purchase
+  benefits, stock alert, Instagram feed) follow the rules there.
+- Use the theme's settings as far as they go: global settings, then section and
+  block settings. Only create a new section, block, snippet or asset when no
+  existing one can build the component. Name it with a `cc-` prefix
+  (`sections/cc-feature-banner.liquid`) and follow the `horizon-theme` skill.
+- Styling that no setting can reach goes in the owner `cc-` section or block's
+  own `{% stylesheet %}` tag, or becomes a new setting when it varies per
+  instance. Never edit a stock (non-`cc-`) file for it: list it as a `manual`
+  fix. Follow the fix ladder in design-match step 4.
 - Keep section IDs in templates stable when editing an existing template.
 - Links (buttons, cards, images, text links): point them at the real resource
   (`shopify://collections/<handle>`, `shopify://pages/<handle>`, ...) when it
@@ -380,19 +463,21 @@ exact match for a Figma section. Write the mapping out like this:
 
 ### Check the page
 
-When the page is built, check it before moving on:
+When the page is built, run the design-match loop (`references/design-match.md`
+steps 2–5) on every section before moving on:
 
 1. If the project has a theme ID (`themeId` in `.twin-dev.json`), push the changed files to
    it as the `shopify-theme-deploy` skill describes. Otherwise run
    `shopify theme dev` and use the local preview URL.
-2. With a browser tool, screenshot the page at 1440px and 390px and compare it
-   section by section with the Figma screenshots: order, spacing, sizes, colours,
-   alignment, image crops.
-3. Fix what's fixable with settings and check again. Stop after three rounds on
-   one page and list what's left.
+2. Measure each section at the desktop frame's width, then at the mobile
+   width, against its spec.
+3. Fix every mismatch with the fix ladder, push, and measure again. Keep going
+   until only `manual`, `content`, `theme limit` or `design` mismatches remain, or two
+   rounds in a row change nothing.
 
-Without a browser tool, say so, mark the page `built` (not checked) in the build
-log, and leave the comparison to the `qa-checker` agent.
+Mark the page `matched` in the build log, with the remaining mismatches and
+their labels. Without a browser tool, say so, mark the page `built` (not
+checked), and leave the comparison to the `qa-checker` agent.
 
 ## 5. Menus
 
@@ -441,5 +526,10 @@ Finish with:
   `.twin-dev.json`) so it checks those pages 1:1;
 - menus created, and every menu item or section link set to `#`, with what it
   should link to;
-- design details the theme can't reproduce without custom code;
+- the design match for each page: elements measured, mismatches fixed by
+  setting, by new `cc-` file, by `{% stylesheet %}` CSS and by new setting, and
+  what remains with its label (`manual`, `content`, `theme limit`, `design`);
+- the **Manual fixes** list: every mismatch that needs a stock (non-`cc-`) file
+  change, with the element, Figma vs live value, owner file and suggested
+  change;
 - contrast failures found in the design.

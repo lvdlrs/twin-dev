@@ -232,7 +232,11 @@ For each frame, top to bottom:
    `line-height`, `letter-spacing`, `text-transform`, `text-align`, `color`,
    `background-color`, `padding`, `margin`, `gap`, `border`, `border-radius`,
    `box-shadow`, `opacity`, `object-fit`, `object-position`, `aspect-ratio`,
-   `max-width`. Pair each live element with its Figma node, one to one.
+   `max-width`. Pair each live element with its Figma node, one to one. Use the
+   measuring script and spec format in the twin-dev plugin's
+   `skills/figma-to-theme/references/design-match.md` (find it under
+   `~/.claude/plugins`). The store builder measures with the same file, so your
+   numbers line up with its build log (`figma-build.md`).
 3. **Core four, on every paired element:**
    - **Colour**: text, background, border, icon fill/stroke, overlay, gradient
      stops, button colours in every designed state. Convert the browser's
@@ -317,6 +321,9 @@ For every discrepancy, say what causes it and where to fix it:
 - `setting`: a theme or section setting is wrong; name the setting
   (`type_size_h1`, the section's `padding-block-start`) and the value to set.
 - `code`: needs a Liquid/CSS/JS change; give `path:line` if you can find it.
+  Name the fix-ladder level from design-match step 4: CSS in the owner `cc-`
+  section or block's `{% stylesheet %}`, a new setting, a new `cc-` file, or
+  `manual` when the change belongs in a stock (non-`cc-`) file.
 - `content`: store content differs from the design (image, product title,
   menu item, copy in a block).
 - `theme limit`: the theme can't do it without custom code (a setting doesn't
