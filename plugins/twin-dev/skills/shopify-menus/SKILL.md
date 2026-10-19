@@ -79,11 +79,12 @@ Authenticate once per store. The CLI opens a login, so ask the user to run it
 in their own terminal if it needs a browser:
 
 ```bash
-shopify store auth --store <store>.myshopify.com --scopes read_online_store_navigation,write_online_store_navigation,read_products,read_content
+shopify store auth --store <store>.myshopify.com --scopes read_online_store_navigation,write_online_store_navigation,read_products,read_content,read_legal_policies
 ```
 
 Drop `read_products` / `read_content` if the menu doesn't link to products,
-collections, pages, blogs or articles. Re-run `store auth` if a command fails
+collections, pages, blogs or articles. Drop `read_legal_policies` if the menu has
+no Shipping, Returns/Refund, Privacy or other policy items. Re-run `store auth` if a command fails
 because the token is missing, expired or lacks a scope.
 
 Run requests:
@@ -149,10 +150,28 @@ a Figma frame (use the Figma MCP tools to read the nav), or another menu.
    to `#` (`{ "type": "HTTP", "url": "#" }`). Mark it in the plan so the merchant
    knows to relink it later. Don't invent IDs, and don't create products,
    collections or pages unless the user asks.
-3. Keep to three levels (top, child, grandchild). Check the theme can show the
+3. Policy items (Shipping, Returns / Refunds, Privacy, Terms, Contact info) link
+   to the store's policies (Settings > Policies), not to pages. Run the **Look up
+   policies** query in the reference and match by item label:
+
+   | Item label (any wording) | Policy `type` |
+   |---|---|
+   | Shipping, Delivery | `SHIPPING_POLICY` |
+   | Returns, Refunds, Exchanges | `REFUND_POLICY` |
+   | Privacy | `PRIVACY_POLICY` |
+   | Terms, Terms of Service | `TERMS_OF_SERVICE` |
+   | Contact information | `CONTACT_INFORMATION` |
+
+   - Policy exists (returned with a non-empty `body`): link it as
+     `{ "type": "SHOP_POLICY", "resourceId": "<ShopPolicy id>" }`.
+   - Policy missing or its `body` is empty: link it to `#`
+     (`{ "type": "HTTP", "url": "#" }`) and mark it in the plan as "add the
+     policy in Settings > Policies, then relink".
+   - Don't fall back to a page with a similar name, and don't write policy text.
+4. Keep to three levels (top, child, grandchild). Check the theme can show the
    depth you plan: in Horizon, the header menu block's settings and the mega menu
    layout decide how deep levels render.
-4. Choose create vs update:
+5. Choose create vs update:
    - New menu: title it `Momentum - <Menu name>`, using the menu's name from the
      design or the user (`Momentum - Main Menu`, `Momentum - Footer Shop`). The
      handle is the title in lowercase with hyphens (`momentum-main-menu`). If
@@ -190,7 +209,8 @@ template, and the `link_list` setting IDs in those schemas.
 - store and menu (title, handle, ID), created or updated;
 - the final item tree as Shopify returned it;
 - backup file path;
-- items linked to `#` (missing resources) and what each should link to later;
+- items linked to `#` (missing resources) and what each should link to later,
+  listing missing policies separately ("add in Settings > Policies");
 - other items left as `HTTP` and why;
 - what's left to do in the theme editor.
 

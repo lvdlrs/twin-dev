@@ -82,6 +82,7 @@ The twin-dev skills need these scopes together:
 |---|---|
 | `read_online_store_navigation`, `write_online_store_navigation` | `shopify-menus` |
 | `read_products`, `read_content` | `shopify-menus` (linking menu items to products, collections, pages, blogs) |
+| `read_legal_policies` | `shopify-menus` (linking Shipping, Returns, Privacy items to store policies) |
 | `write_content` | `shopify-pages` (creating pages and assigning templates) |
 | `read_files`, `write_files` | `shopify-files` |
 
@@ -115,7 +116,7 @@ and approve.
 shopify theme list --store <store>.myshopify.com
 
 # Admin API access
-shopify store auth --store <store>.myshopify.com --scopes read_online_store_navigation,write_online_store_navigation,read_products,read_content,write_content,read_files,write_files
+shopify store auth --store <store>.myshopify.com --scopes read_online_store_navigation,write_online_store_navigation,read_products,read_content,read_legal_policies,write_content,read_files,write_files
 ```
 
 Don't run them yourself: they wait for a browser login. Don't ask the user to

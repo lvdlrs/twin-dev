@@ -1,7 +1,8 @@
 # Menu GraphQL reference
 
 Admin GraphQL API. Scopes: `read_online_store_navigation` to read,
-`write_online_store_navigation` to create, update or delete.
+`write_online_store_navigation` to create, update or delete,
+`read_legal_policies` to look up store policies.
 
 ## List menus (with three levels of items)
 
@@ -128,6 +129,23 @@ query Resources {
   shop { shopPolicies { id type title url } }
 }
 ```
+
+## Look up policies
+
+Needs the `read_legal_policies` scope. Only policies the merchant has set up are
+returned; treat a policy with an empty `body` as missing too.
+
+```graphql
+query Policies {
+  shop { shopPolicies { id type title url body } }
+}
+```
+
+`type` is one of `SHIPPING_POLICY`, `REFUND_POLICY`, `PRIVACY_POLICY`,
+`TERMS_OF_SERVICE`, `CONTACT_INFORMATION`, `SUBSCRIPTION_POLICY`,
+`LEGAL_NOTICE`, `TERMS_OF_SALE`. Link a found policy with
+`{ "type": "SHOP_POLICY", "resourceId": "<id>" }`; link a missing one to
+`{ "type": "HTTP", "url": "#" }`.
 
 For a few products or articles, query by handle instead of listing everything:
 
