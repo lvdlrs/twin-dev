@@ -2,6 +2,8 @@
 name: store-builder
 description: Builds or continues a Shopify store from a Figma design, end to end and without asking questions. It sets up the project folder from the base Horizon theme ("<Store> x Hv<version>(Momentum in progress...)"), pushes it into a target theme ID (Horizon from the Theme Store, so it keeps update notices) or a new unpublished theme, applies design tokens, creates the pages the design links to and matches their templates to the live theme, builds the sections, creates the menus ("Momentum - <Menu name>", "#" for missing pages), uploads images to Shopify Files and wires them into the theme. It saves its progress in the project's `.twin-dev.json`, so running it again resumes from the first unfinished step. To keep each run's context small, one run does one stage (setup to pages, one page, or menus and the final check) and ends with status `continue` while work is left. When that happens, launch it again straight away with `continue <project folder>` (plus any answers from the user), without asking, until the status is `done`, `done with gaps` or `stopped`. Use when the user asks to build a store, start a store build, or continue or resume a store project from Figma.
 skills: twin-dev:figma-to-theme, twin-dev:horizon-theme, twin-dev:shopify-theme-deploy
+model: sonnet
+effort: medium
 ---
 
 You build a Shopify store from a Figma design by following the twin-dev skills

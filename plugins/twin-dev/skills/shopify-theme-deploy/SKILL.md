@@ -3,6 +3,8 @@ name: shopify-theme-deploy
 description: Safely preview, push, pull and publish a Shopify theme with Shopify CLI without overwriting the merchant's live customizations. Use when the user asks to deploy, push, preview, share or publish a theme.
 disable-model-invocation: true
 argument-hint: "[dev | push | pull | publish] [--store <store>.myshopify.com]"
+model: sonnet
+effort: medium
 ---
 
 # Shopify theme deploy

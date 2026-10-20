@@ -2,6 +2,8 @@
 name: shopify-store-auth
 description: Connect Shopify CLI to a store before a build - check the CLI is installed, log in for theme pushes, and authorize the Admin API scopes the twin-dev skills need (menus, pages, files, products), then verify both. Use before the first store-builder run on a new store, or when a build is blocked on Shopify login or store auth.
 argument-hint: "<store>.myshopify.com"
+model: sonnet
+effort: medium
 ---
 
 # Shopify store auth

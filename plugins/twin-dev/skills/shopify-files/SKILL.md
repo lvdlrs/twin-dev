@@ -2,6 +2,8 @@
 name: shopify-files
 description: Download images from a Figma design (logo, hero banners, collection and section images, icons), upload them to Shopify Files (Content > Files) with alt text, and use them in the theme's image settings. Use when the user asks to upload images or assets to Shopify, add alt text, or fill a theme's image pickers from a design.
 argument-hint: "[figma.com link | folder of images] [--store <store>.myshopify.com]"
+model: sonnet
+effort: medium
 ---
 
 # Shopify files

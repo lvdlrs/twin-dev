@@ -2,6 +2,8 @@
 name: shopify-pages
 description: Create the store's pages (Online Store > Pages) a Figma design links to, and give each one the right page template - matching our theme's template names to the live theme's, and adding a missing template to the live theme as a copy of its page.json so it can be assigned. Includes the standard Visit the Store, All Looks and All Brands pages. Use before creating menus, when the user asks to create or set up pages, assign page templates, or fix menu items linked to "#" because a page is missing.
 argument-hint: "[figma.com link] [--store <store>.myshopify.com]"
+model: sonnet
+effort: medium
 ---
 
 # Shopify pages

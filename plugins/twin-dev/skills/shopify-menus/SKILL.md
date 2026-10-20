@@ -2,6 +2,8 @@
 name: shopify-menus
 description: Create, update, back up and restore navigation menus (Online Store > Navigation) in a Shopify store's admin through the Admin GraphQL API (Shopify CLI `store execute`). Use when the user asks to add, build, change, copy or import a header, footer, mega or mobile menu, or to set up navigation from a sitemap, Figma design or existing site.
 argument-hint: "[list | create | update | backup | restore] [--store <store>.myshopify.com]"
+model: sonnet
+effort: medium
 ---
 
 # Shopify menus

@@ -2,6 +2,8 @@
 name: new-store-theme
 description: Start a new store build from the local base Horizon theme - copy it into a new project folder, name it "<Store> x Hv<version>(Momentum in progress...)", push it into an existing theme ID (Horizon added from the Theme Store, so it keeps update notices) or as a new unpublished theme, then build the Figma design into it. Use when the user starts a new store or client project, or gives a Figma design for a store that has no project folder yet.
 argument-hint: "<Store name> [figma.com link] [--store <store>.myshopify.com] [--theme-id <id>]"
+model: sonnet
+effort: medium
 ---
 
 # New store theme
