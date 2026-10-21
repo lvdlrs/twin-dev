@@ -414,6 +414,36 @@ component to use and how it behaves.
        and check by switching between a low-stock and an in-stock variant.
   3. Place it where the design shows it inside the product details, and
      record the new block in the section library.
+- **Hero banner (first section of a page).** A large banner directly under the
+  header: one image (or a collage that is a single image) edge to edge, usually
+  with a heading, sub-heading and button laid over it. Examples: "just in New
+  Arrivals" + "Shop now" over a model photo.
+  - When the first section is a banner like this, build it with the
+    `slideshow` section, even when the design shows only one banner, so the
+    merchant can add more slides later. Don't use `hero`,
+    `media-with-content` or a plain image section for it.
+  - When the first section isn't a banner like this (a split layout, a product
+    or collection grid, a video, a section with its own components), don't
+    force it into a slideshow. Build it like any other section, in this
+    order: an existing section and blocks whose settings can produce the
+    design, then a new block added to an existing section, then a new `cc-`
+    custom section only when neither can (see "Build the page").
+  - The base theme's `templates/index.json` already starts with a `slideshow`.
+    Keep that section and edit its slides, don't replace it with another type.
+    On any other template, add a `slideshow` as the first section from the
+    `Slideshow: Full frame` preset.
+  - One `_slide` block per banner in the frame, in order. A single banner is
+    one slide. Take the image, overlay text, buttons, alignment and overlay
+    from the frame onto the slide's blocks; delete the preset slides the
+    design doesn't show.
+  - Set `section_width` to `full-width` when the banner touches the screen
+    edges, `page-width` when it sits inside the grid. Pick the `slide_height`
+    option closest to the frame's height (`auto` follows the image).
+  - Put the desktop image in the slide's `image_1` and, when there is a
+    separate mobile frame, its crop in `image_2`, so each breakpoint shows its
+    own image. Keep `media_type_1` on `image`.
+  - Show the slide controls (arrows, dots) only if the design draws them. A
+    one-slide banner has none.
 - **Instagram feed.** A grid or row of Instagram posts, usually with an
   `@handle` or a "Follow us" heading.
   - Use the `section` **Instafeed** preset, whose `cc-instafeed` block is the
