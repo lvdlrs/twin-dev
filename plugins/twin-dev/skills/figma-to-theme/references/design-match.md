@@ -61,8 +61,18 @@ mobile values in the same row when the section has a mobile frame.
   spacing % → px (`size × % / 100`); weight names → numbers (Thin 100,
   ExtraLight 200, Light 300, Regular 400, Medium 500, SemiBold 600, Bold 700,
   ExtraBold 800, Black 900).
-- If the desktop frame isn't 1440 wide, scale its values to 1440 (see
-  `figma-to-theme` step 2).
+- Write the values exactly as Figma shows them, in the frame's own width
+  (never scaled or back-solved for the fluid scale; see `figma-to-theme`
+  step 2). Take every size, weight, tracking and colour from
+  `get_design_context`, never from an earlier decision or memory of another
+  section.
+- **Setting audit, before measuring.** After building a section, compare its
+  saved settings with the spec with a `node -e` that prints only mismatches:
+  each font size, letter spacing, weight, colour and spacing setting must equal
+  the spec value (desktop and `_mobile`). Fix every difference (and any
+  fraction such as 12.2 or 15.3, which means a value was computed, not read)
+  before the browser measurement. This catches most mismatches without a
+  browser, so the later QA pass has little left to find.
 - Under the table, add a **Layout** line: the elements in visual order, the
   columns, and what's visible only on desktop or mobile
   (`heading · text · 2 buttons in a row | image right, 50% · mobile: image first`).
@@ -153,7 +163,10 @@ first, then find the property that causes it.
   position, or any difference in font family, case or copy.
 - Ignore sub-pixel rounding and anti-aliasing only.
 - **Fluid sizes** (`cc-fluid-value`, `clamp()`): measure at the frame's width
-  only.
+  only, and compare the **setting** with the Figma value too: it must equal
+  Figma exactly. A frame narrower than 1440 renders a fluid size slightly
+  under the setting; that's the scale, not a mismatch. Never change a setting
+  to a non-Figma number to make the measurement match.
 - **Sections without a mobile frame**: colour and weight must match the
   desktop frame. Size and spacing follow the mobile tokens and the patterns of
   the mobile frames that do exist. Check for no horizontal scroll and for tap

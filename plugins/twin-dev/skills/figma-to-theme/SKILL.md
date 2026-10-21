@@ -113,6 +113,34 @@ Ignore hidden layers, frames named like `old`, `v1`, `archive`, `wip` or
 `unused`, and anything outside page frames, unless the user says otherwise. If
 two frames look like versions of the same page, ask which one is final.
 
+**Reading how the designer structured a frame.** Designs are often exported
+from code or hand-edited, so the layer tree can mislead. Read it like this
+before you write any section spec:
+
+- **Layer names differ by page.** Some frames have generic auto names
+  (`Container`, `Paragraph`, `Link`), others have meaningful ones (`Stock
+  alert`, `Purchase benefits`, `Collection controls`, `Load more`). When a
+  frame has meaningful names, use them to recognise the component (see
+  **Recurring store components**); when it's generic, recognise it by what it
+  does and where it sits.
+- **Stray and duplicated layers.** Hand-edited frames keep leftovers: repeated
+  groups of the same component (a "Purchase benefits" row three or four times
+  at stacked y positions), zero-width or 1px frames, two same-named text
+  layers at overlapping positions, loose vectors. Decide what's visible with
+  one screenshot of that section, build only what's visible, and don't count
+  the leftovers as extra elements.
+- **Repeated rows are one grid.** Several identical rows of cards (two rows of
+  four, each in its own wrapper) are one product grid with a row gap, not
+  separate sections. Count the columns from the card widths.
+- **Names don't always match behaviour.** A frame called `Load more` may hold
+  numbered pagination ("1 2 3" with an arrow). Take the behaviour from what is
+  drawn, not the name.
+- **Overlap is a tab or toggle.** Two titles side by side with a line under one
+  (`You may also like` / `Recently viewed`) are tabs; the underlined one is
+  the active tab.
+- **Collection and product frames are usually desktop only.** Check the mobile
+  list from step 1 before you write mobile values for them.
+
 ## 2. Build a token sheet
 
 The base theme is Capital Commerce's Horizon build
@@ -214,11 +242,18 @@ How to convert Figma values to this theme:
   to the range, then fix the exact value with the fix ladder.
 - **Desktop and mobile values.** The base theme scales every desktop/mobile pair
   (type sizes, gaps, custom widths, spacers) linearly from the mobile value at
-  375px to the desktop value at 1440px (`snippets/cc-fluid-value.liquid`). Take
-  desktop values from the 1440 frame and mobile values from the mobile frame (a
-  375 or 390 frame both work). If the desktop frame isn't 1440 wide (1280, 1920),
-  scale values to 1440 or ask. If there's no mobile frame for a token, leave
-  the mobile setting at the theme value and say so; don't invent a smaller size.
+  375px to the desktop value at 1440px (`snippets/cc-fluid-value.liquid`).
+  **Figma is the source of truth: every setting holds the exact value Figma
+  shows, never a back-solved or scaled number.** Put the desktop frame's value
+  in the desktop setting and the mobile frame's value in the mobile setting
+  (a 375 or 390 frame both work), whatever the desktop frame's width (1280,
+  1359, 1920). Never compute a value so the fluid scale lands on the Figma
+  number at the frame width: that gives fractions such as 12.2 or 15.3 in the
+  editor that match nothing in the design. If a measurement at the frame width
+  differs from Figma only because of the scale, it's not a mismatch (see
+  `references/design-match.md` tolerance). If there's no mobile frame for a
+  token, leave the mobile setting at the theme value and say so; don't invent
+  a smaller size.
 - **More text styles than slots.** Map the most used styles to H1–H6 and
   paragraph by size, not by the layer name ("Heading/XL" might be the theme's
   H2). List the rest and set them per block with the `text` block's
