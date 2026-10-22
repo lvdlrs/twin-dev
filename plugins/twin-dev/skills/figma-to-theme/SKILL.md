@@ -227,9 +227,14 @@ How to convert Figma values to this theme:
 - **Line heights** are presets, not numbers. Pick the closest: headings
   `display-tight` 1.0, `display-normal` 1.1, `display-loose` 1.2; paragraph and
   buttons `body-tight` 1.2, `body-normal` 1.4, `body-loose` 1.6. Figma gives line
-  height in px or %, so divide by the font size first. For a value more than
-  0.1 away from a preset, set the closest preset and fix the exact value with
-  the fix ladder in `references/design-match.md` (step 4).
+  height in px or %, so divide by the font size first. Always use the closest
+  preset, even when the design's value is between presets: don't change the
+  line-height settings or presets, and don't override the line height in CSS or
+  a new setting to hit the exact number. Keeping to the existing setting keeps
+  Horizon updates easy to merge. Only when the element has no line-height
+  setting at all, add one (fix ladder in `references/design-match.md`). List
+  any element whose line height is off by more than 0.1 as a `manual` note, not
+  a fix.
 - **Letter spacing** is in px, 0–10 in 0.1 steps. Convert Figma % to px
   (`size × % / 100`). Negative tracking can't be set: use 0 and fix it with the
   fix ladder (a global value with no theme setting is a `manual` item).

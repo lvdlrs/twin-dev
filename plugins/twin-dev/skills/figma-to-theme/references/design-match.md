@@ -177,6 +177,17 @@ first, then find the property that causes it.
 Fix each mismatch at the first level that can reach the exact value. Never
 skip ahead to code when a setting can do it.
 
+**Use existing settings as much as possible; add only what they can't achieve.**
+Settings, presets and styles that already exist in the theme come first, so a
+Horizon update stays easy to merge. Don't edit or rename the theme's existing
+settings or presets, and don't add a new setting or CSS for something an
+existing one already covers. Add (level 3 or 4) only when no existing setting
+can reach the value.
+
+Line height is the clearest case: when the element has a line-height setting,
+use the closest preset and stop, even if the result is a little off. Add a
+setting or CSS only when the element has no line-height setting at all.
+
 1. **Global theme setting.** The value is a token used across the site (all
    H2s, every primary button). Fix it in `config/settings_data.json`, then
    re-measure every section that uses it.
@@ -190,8 +201,7 @@ skip ahead to code when a setting can do it.
    settings for every value the design varies, with the design's values as
    defaults and in its preset.
 4. **Styling the settings can't reach, in a `cc-` file.** These are values
-   outside a setting's range or options: negative letter spacing, a line height
-   between presets, a shadow, a one-off radius, a hover state. Only do this
+   outside a setting's range or options: negative letter spacing, a shadow, a one-off radius, a hover state. Only do this
    when the element is rendered by a `cc-` section or block.
    - **Same for every instance** of that section or block: add the CSS to the
      **owner file's own `{% stylesheet %}` tag**, the `cc-` section or block

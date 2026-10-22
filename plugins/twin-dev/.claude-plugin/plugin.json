@@ -1,6 +1,6 @@
 {
   "name": "twin-dev",
-  "version": "1.10.4",
+  "version": "1.10.5",
   "description": "Shopify Horizon theme skills and agents: conventions, new store setup, deploy, Figma-to-theme, admin pages, menus, files, section library, Shopify Dev MCP, review, accessibility, schema/locale and QA checks.",
   "author": {
     "name": "lvdlrs"
