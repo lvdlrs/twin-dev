@@ -214,9 +214,13 @@ How to convert Figma values to this theme:
   settings at palette colours (`{{ settings.color_palette.color2 }}`) instead of
   pasting hex values, so changing the palette updates every role.
 - **Fonts**: font settings take Shopify font-library handles with style and weight
-  (`inter_n7`, `roboto_condensed_n4`). If the brand font isn't in the library, say
-  so, suggest the closest library font, and only add a custom `@font-face` if the
-  user agrees and supplies the licensed files. H1–H2 can only use `heading` or
+  (`inter_n7`, `roboto_condensed_n4`). Pick the font in this order:
+  1. The Shopify font library, if the brand font is there.
+  2. Google Fonts, if it isn't in the library but is there (free, so load it).
+  3. A custom font the user uploads, if it's in neither. Say so, ask the user for
+     the licensed font files, and add a custom `@font-face` from them. Until they
+     arrive, use the closest library font and list the font under "needs files".
+  H1–H2 can only use `heading` or
   `accent`; H3–H6 can also use `subheading` or `body`.
 - **Sizes** (`type_size_*`, `badge_font_size`, `variant_*_font_size`) are free
   numbers in px. Use the Figma value as is.
@@ -347,6 +351,10 @@ stays local.
   and its children (gallery, title, price, swatches, quick shop) once. Then reuse
   that setup in every section that shows cards; the inventory's block trees show
   which ones do.
+- Product data on a card (vendor, type, SKU, or any other product field the
+  card has no block for): add a `text` block inside the card and connect its
+  `text` setting to the dynamic source (e.g. product vendor). Never use a
+  `custom-liquid` block for it. Style it through the text block's own settings.
 - Drawers, popovers and the cart drawer take their colours from the global
   settings in step 3. Check any state frames (cart drawer, mega menu, mobile
   menu) against them.
@@ -568,6 +576,14 @@ exact match for a Figma section. Write the mapping out like this:
 - Copy: use the real text from the design in block settings. If the design uses
   lorem ipsum or obvious placeholder copy, keep the theme's default text and list
   the section under "copy needed".
+- Dynamic source first: if a block setting can connect to a dynamic source
+  (text, image, link, URL, richtext, product / collection / page / blog
+  fields, metafields), connect it. Never hardcode the design's sample value in
+  a template that renders store data, such as a product card or product page
+  (vendor, title, price, image, collection name, article title and so on).
+  Hardcode only content that is the same for every item: a section heading, a
+  button label, or marketing copy. And never use a `custom-liquid` block to
+  print data a block can already read from a dynamic source.
 - Text styles: use `type_preset` `h1`–`h6` / `paragraph` when the style matches a
   global token; `custom` only for the extra styles listed in step 2.
 - Buttons: `style_class` `button` / `button-secondary` when they match the global

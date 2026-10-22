@@ -246,7 +246,8 @@ Save each one to `build.decisions` (step, topic, choice, why) as you make it.
   failing pairs.
 - **Brand font not in the Shopify font library**: load it from Google Fonts if
   it's there. If it isn't, use the closest font in the Shopify library (same
-  classification, similar width and x-height).
+  classification, similar width and x-height) for now, and list the brand font
+  in the report as needing the user to upload its font files.
 - **Recurring store components**: designs differ per store, so recognise these
   by what they do and where they sit, not by how one design draws them. Build
   them as `figma-to-theme` "Recurring store components" says, styled from this
