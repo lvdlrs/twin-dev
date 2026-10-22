@@ -174,8 +174,8 @@ first, then find the property that causes it.
 
 ## 4. Fix ladder
 
-Fix each mismatch at the first level that can reach the exact value. Never
-skip ahead to code when a setting can do it.
+Fix each mismatch at the first level whose existing settings can match the
+design closely. Never skip ahead to code when a setting can do it.
 
 **Use existing settings as much as possible; add only what they can't achieve.**
 Settings, presets and styles that already exist in the theme come first, so a
