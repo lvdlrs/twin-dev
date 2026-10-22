@@ -185,8 +185,11 @@ a Figma frame (use the Figma MCP tools to read the nav), or another menu.
    depth you plan: in Horizon, the header menu block's settings and the mega menu
    layout decide how deep levels render.
 5. Choose create vs update:
+   - Footer column named "Shop" (any wording like "Shop" / "Shop All"): don't
+     create a footer Shop menu. Use the main menu's items for it (section 4).
+     Other footer columns get their own menu as usual.
    - New menu: title it `Momentum - <Menu name>`, using the menu's name from the
-     design or the user (`Momentum - Main Menu`, `Momentum - Footer Shop`). The
+     design or the user (`Momentum - Main Menu`, `Momentum - Footer Help`). The
      handle is the title in lowercase with hyphens (`momentum-main-menu`). If
      that handle is taken, tell the user instead of picking another one.
    - Existing menu: build the **full** tree, reusing each kept item's `id`.
@@ -216,6 +219,15 @@ template, and the `link_list` setting IDs in those schemas.
   editor. Changing `*-group.json` locally and pushing it overwrites merchant
   settings; if the user wants it done in code, follow `/twin-dev:shopify-theme-deploy`.
 - In Liquid, menus are read with `linklists['<handle>']` or a `link_list` setting.
+
+### Footer Shop column
+
+If the footer design has a "Shop" column, don't create a menu for it. Set that
+footer menu block's `link_list` setting to the main menu (`momentum-main-menu`,
+or the handle saved in `build.menus`), so the column shows what the main menu
+has. Create the main menu first. If the design's Shop column lists only some of
+the main menu's items, say so in the report and leave the full main menu
+assigned, so the merchant can decide.
 
 ### Mobile quick links
 

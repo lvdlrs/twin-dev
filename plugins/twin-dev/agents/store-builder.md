@@ -284,7 +284,8 @@ Each step's key in `build.steps` is in brackets.
    so templates get built under the right names, and before menus, so they
    link to real pages instead of `#`.
 4. [`menus`] Create the menus and set them in the header and footer
-   (`shopify-menus`). Save each created handle to `build.menus`. If the design
+   (`shopify-menus`). Save each created handle to `build.menus`. A footer "Shop"
+   column isn't created as its own menu; it uses the main menu. If the design
    has a quick links bar under the header, create
    `Momentum - Mobile Quick Links` and set it on the `cc-header-quick-links`
    section, as `shopify-menus` "Mobile quick links" describes. Menus come
