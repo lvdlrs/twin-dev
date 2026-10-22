@@ -216,7 +216,14 @@ How to convert Figma values to this theme:
 - **Fonts**: font settings take Shopify font-library handles with style and weight
   (`inter_n7`, `roboto_condensed_n4`). Pick the font in this order:
   1. The Shopify font library, if the brand font is there.
-  2. Google Fonts, if it isn't in the library but is there (free, so load it).
+  2. Google Fonts, if it isn't in the library but is there (free). Host it
+     locally: never add the Google Fonts embed code (`<link>` to
+     `fonts.googleapis.com`, `@import` or `preconnect`). Download the `.woff2`
+     files for only the weights and styles the design uses, put them in the
+     theme's `assets/`, and add an `@font-face` for each with
+     `font-display: swap` and a `{{ 'file.woff2' | asset_url }}` source. Use the
+     Google Fonts CSS API (`css2?family=...`) with a browser user agent to get
+     the `latin` `.woff2` URLs.
   3. A custom font the user uploads, if it's in neither. Say so, ask the user for
      the licensed font files, and add a custom `@font-face` from them. Until they
      arrive, use the closest library font and list the font under "needs files".

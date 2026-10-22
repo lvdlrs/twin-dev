@@ -212,8 +212,9 @@ When `build` already exists:
   or removing existing ones) to `cc-` section and block schemas. Never edit a
   stock (non-`cc-`) file to fix a mismatch: list it as a `manual` fix.
 - Push the project's theme as often as the design-match loop needs.
-- Load a free Google Font for a brand font that isn't in the Shopify font
-  library (see **Decisions**).
+- Host a free Google Font locally (`.woff2` in `assets/` plus `@font-face`, no
+  embed code) for a brand font that isn't in the Shopify font library (see
+  **Decisions**).
 
 ## What you never do
 
@@ -244,8 +245,8 @@ Save each one to `build.decisions` (step, topic, choice, why) as you make it.
 - **Token sheet**: apply it, and include it in the report.
 - **Contrast failures** in the design: keep the design's colours and list the
   failing pairs.
-- **Brand font not in the Shopify font library**: load it from Google Fonts if
-  it's there. If it isn't, use the closest font in the Shopify library (same
+- **Brand font not in the Shopify font library**: if it's on Google Fonts, host
+  it locally as `figma-to-theme` describes (never the embed code). If it isn't, use the closest font in the Shopify library (same
   classification, similar width and x-height) for now, and list the brand font
   in the report as needing the user to upload its font files.
 - **Recurring store components**: designs differ per store, so recognise these
