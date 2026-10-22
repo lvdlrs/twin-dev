@@ -461,6 +461,20 @@ component to use and how it behaves.
   - Don't build the posts as images or a new `cc-` section, and don't download
     or upload the post images: the app pulls them from Instagram.
   - List "install and connect the Instafeed app" for the merchant.
+- **Shop the look.** A lifestyle or model image with products tied to it:
+  hotspots or markers on the image, a product list or carousel beside or under
+  it, or a "Shop the look" heading. Whenever a section in the design does this,
+  use the shop the look blocks, not a custom-liquid block, a plain image with
+  separate product cards, or a new `cc-` section.
+  - Use the `section` **Shop the look** preset: its `_cc-shop-the-look` block
+    is one look and holds the image, hotspots (`_cc-shop-the-look-card`) and
+    products. Copy the preset's structure and add one block per look in the
+    frame, in order.
+  - Take the heading, image and layout from the frame. Connect each product to
+    a real product through its product picker, not hardcoded text (see
+    "Dynamic source first").
+  - If a design shows a page of all looks, `cc-all-looks` on the `all-looks`
+    page is the place for it (`shopify-pages`).
 
 When a design repeats a component that isn't on this list, and it's the same
 kind of thing across stores (a size guide link, a delivery estimate, a
