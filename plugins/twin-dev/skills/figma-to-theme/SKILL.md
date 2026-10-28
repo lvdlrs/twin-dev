@@ -111,6 +111,11 @@ the typography note in step 2).
 
 Ignore hidden layers, frames named like `old`, `v1`, `archive`, `wip` or
 `unused`, and anything outside page frames, unless the user says otherwise. If
+the file has a frame named like `Guided Mockup` or `Guide Mockup`, skip it too.
+It's an annotated walkthrough for the client (a page picture with callout cards,
+arrows and notes about each section), not a page to build, and its colours,
+fonts and layout don't count as the design. Don't read its callout text as copy
+or section specs. If there's no such frame, carry on. If
 two frames look like versions of the same page, ask which one is final.
 
 **Reading how the designer structured a frame.** Designs are often exported
