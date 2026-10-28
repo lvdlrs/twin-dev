@@ -87,9 +87,17 @@ From Figma (needs the Figma MCP tools), go page by page:
 
 From a folder the user gives: use the images in it as they are.
 
-**Formats**: JPG for photos, PNG for images that need transparency, and SVG for
-logos and icons when Figma gives vector art. Keep each file under 20 MB. Shopify's
-CDN serves WebP/AVIF to browsers on its own, so don't convert.
+**Formats**: use JPG whenever the image can be JPG. Use PNG only for images that
+need transparency (a logo or cut-out with a transparent background), and SVG for
+logos and icons when Figma gives vector art. Keep each file under 20 MB.
+
+- Ask `download_assets` for JPG on every photo and opaque image (hero, banner,
+  collection, look, occasion, split and background images). If the export comes
+  back as PNG, convert it to JPG (quality about 85) before uploading.
+- Before keeping a PNG, check that it really has transparent pixels. A PNG with
+  a solid background is a JPG.
+- Don't convert JPG or PNG to WebP/AVIF. Shopify's CDN serves those to browsers
+  on its own.
 
 ## 2. Name and describe
 
