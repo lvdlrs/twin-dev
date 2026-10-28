@@ -232,6 +232,24 @@ How to convert Figma values to this theme:
   3. A custom font the user uploads, if it's in neither. Say so, ask the user for
      the licensed font files, and add a custom `@font-face` from them. Until they
      arrive, use the closest library font and list the font under "needs files".
+     **Leave the user a reminder** at the top of the merchant to-do in
+     `figma-build.md` and in the final report, one line per font, in this form:
+     `Upload custom font: <Family> <weights/styles> (.woff2) → theme assets/<family-slug>-<weight>.woff2, then fill the @font-face in snippets/cc-fonts.liquid`.
+     Prepare the place so the user only drops files in: create
+     `snippets/cc-fonts.liquid` with one commented `@font-face` block per
+     weight (`font-family`, `font-weight`, `font-display: swap`,
+     `src: url({{ '<family-slug>-<weight>.woff2' | asset_url }}) format('woff2')`),
+     inside a `{% style %}` tag. Rendering it needs one line,
+     `{% render 'cc-fonts' %}`, before `</head>` in `layout/theme.liquid`. That is
+     a stock file, so list it under **Manual fixes**. The font setting keeps the
+     closest library font until the files are in.
+  **Every weight the design uses must load.** A font setting loads only its
+  regular and bold files, so a library font used at 500 or 600 renders at 400 or
+  a faked 700. List every family and weight in the design (nav 500, buttons 600,
+  eyebrows 500...). For each weight the settings don't load, host that weight
+  locally as in step 2 (Google Fonts `.woff2` in `assets/` plus an `@font-face`
+  for that exact weight), even when the family itself comes from the library.
+  Confirm with `document.fonts` at the first page, before building sections.
   H1–H2 can only use `heading` or
   `accent`; H3–H6 can also use `subheading` or `body`.
 - **Sizes** (`type_size_*`, `badge_font_size`, `variant_*_font_size`) are free

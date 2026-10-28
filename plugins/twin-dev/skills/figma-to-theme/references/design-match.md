@@ -255,6 +255,29 @@ then log a failure (the value, what you tried, and why it didn't change) and
 move on. Don't stop because a fixed number of rounds is used up while fixes
 are still landing.
 
+**The QA checker should find almost nothing.** A later QA pass measures the
+same spec you do, so every difference it finds is one you left behind. Before
+you mark a page `matched`:
+
+- A mismatch that an existing section or block setting can fix (padding, gap,
+  width, alignment, line-height preset, a `_mobile` size or letter spacing,
+  button padding, an unset colour) may not remain. Listing it as remaining means
+  step 2 of the fix ladder was skipped. Only `manual`, `content`, `theme limit`
+  and `design` stay.
+- Set the mobile settings (`font_size_mobile`, `letter_spacing_mobile`,
+  `type_size_h2_mobile`, logo height, section padding, gaps) on every text
+  element and section, not only the desktop ones.
+- Check `document.fonts` for every weight at the start of the first page, and
+  fix missing weights before measuring anything else (see `figma-to-theme`,
+  Fonts).
+- Do a last full pass over every spec row on a freshly loaded page, desktop and
+  mobile, after your final push. Fixes to global settings or shared files can
+  move earlier sections.
+- Report exact counts, never estimates ("about 60"). Keep the real tally in
+  `figma-build.md`.
+- Leave no empty link, no unset favicon and no placeholder copy that the
+  design gives a value for.
+
 Fix global settings before section-level ones. One wrong token can cause dozens
 of mismatches, so the first round on the first page is usually where most
 global fixes happen.
