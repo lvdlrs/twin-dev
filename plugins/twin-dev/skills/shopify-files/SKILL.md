@@ -75,7 +75,7 @@ From Figma (needs the Figma MCP tools), go page by page:
 1. `get_metadata` to list the frames, then find each image layer: logo, hero
    and banner images, collection list and card images, image-with-text,
    background images, and icons that aren't in the theme's icon set.
-2. `download_assets` for each one. Export photos at 2x the frame size. If the
+2. `download_assets` for each one. Export photos at 3x the frame size. If the
    desktop and mobile frames crop an image differently and the section has a
    separate mobile image setting, download both.
 3. Skip product photos and images of collections or products that exist in the
