@@ -30,7 +30,7 @@ Every twin-dev skill and agent records its failures in one shared file,
 - **Before you start**, read past entries for this agent and for the skills you
   use, and use the fixes recorded there instead of repeating an approach that
   already failed:
-  `grep -n -A5 -E "· (store-builder|new-store-theme|figma-to-theme|horizon-theme|shopify-pages|section-library|shopify-menus|shopify-files|shopify-theme-deploy) ·" ~/.claude/twin-dev/failures.md`
+  `grep -n -A5 -E "· (store-builder|new-store-theme|figma-to-theme|horizon-theme|shopify-store-content|section-library|shopify-theme-deploy) ·" ~/.claude/twin-dev/failures.md`
   (no output or no file means nothing recorded yet).
 - **When something fails**, append an entry straight away, not at the end, so
   it's saved even if the run stops. Create the folder and file if missing.
@@ -195,9 +195,9 @@ When `build` already exists:
   create the project's theme.
 - After that, push only to the project's theme ID (from `.twin-dev.json`).
 - Create the pages the design links to, and assign a template to existing pages
-  that use the default one (`shopify-pages`). New pages are published and empty.
-- Add a missing page template to the **live** theme, only as `shopify-pages`
-  step 5 describes: a copy of live's own `page.json` under a new name, pushed
+  that use the default one (`shopify-store-content`, pages). New pages are published and empty.
+- Add a missing page template to the **live** theme, only as `shopify-store-content`
+  pages.md step 5 describes: a copy of live's own `page.json` under a new name, pushed
   alone with `--only <file> --nodelete --allow-live`. Never overwrite a live
   file.
 - Rename the project's page templates to match the live theme's names.
@@ -233,7 +233,7 @@ When `build` already exists:
   `SKIPPED_EXISTS` that's in your manifest from an earlier run is yours: use its
   `shopify://shop_images/<filename>` reference.
 - Log in for the user. If `shopify store execute` or `theme push` needs
-  authentication, mark that step `blocked` with "Run `/twin-dev:shopify-store-auth
+  authentication, mark that step `blocked` with "Run `/twin-dev:shopify-store-content auth
   <store>.myshopify.com`" (it gives the exact login commands), keep building
   locally, and carry on with the steps that don't need it.
 - Add paid or licensed fonts, paid apps, or licensed assets.
@@ -282,20 +282,20 @@ Each step's key in `build.steps` is in brackets.
    setup script in step 1 when the task gives one.
 3. [`storePages`] Read the design's menus and links (`figma-to-theme` 0–1
    inventory), create the pages they point to plus the standard ones, and
-   settle their template names (`shopify-pages`). This comes before building,
+   settle their template names (`shopify-store-content`, pages). This comes before building,
    so templates get built under the right names, and before menus, so they
    link to real pages instead of `#`.
 4. [`menus`] Create the menus and set them in the header and footer
-   (`shopify-menus`). Save each created handle to `build.menus`. A footer "Shop"
+   (`shopify-store-content`, menus). Save each created handle to `build.menus`. A footer "Shop"
    column isn't created as its own menu; it uses the main menu. If the design
    has a quick links bar under the header, create
    `Momentum - Mobile Quick Links` and set it on the `cc-header-quick-links`
-   section, as `shopify-menus` "Mobile quick links" describes. Menus come
+   section, as `shopify-store-content` menus.md "Mobile quick links" describes. Menus come
    before the header and footer are built, so those are matched with their
    real menus.
 5. [`tokens`] Apply global tokens: logo size, typography, colours, buttons and
    the rest of the token sheet (`figma-to-theme` 1–3).
-6. [`images`] Upload images (`shopify-files`), so sections can use them as you
+6. [`images`] Upload images (`shopify-store-content`, files), so sections can use them as you
    build.
 7. [`pages`] Build the templates and sections page by page (`figma-to-theme` 4),
    following `horizon-theme` for any code. Before each new `cc-` section or
@@ -329,7 +329,7 @@ Each step's key in `build.steps` is in brackets.
 If a step fails or is blocked, finish every step that doesn't depend on it.
 Pages can be built before `images` is done: leave their image settings empty.
 When `images` runs after pages are already built, it also sets those pages'
-image settings (`shopify-files` step 4). Don't retry
+image settings (`shopify-store-content` files.md step 4). Don't retry
 the same failing command more than twice in a run.
 
 At the end, append to `build.runs` with the time, the stage and the status.
@@ -342,8 +342,8 @@ reports and ends:
 
 | Stage | Steps | Load first (besides the preloaded skills) |
 |---|---|---|
-| `start` | `setup`, `push`, `storePages`, `menus`, `tokens`, `images` | `new-store-theme`, `shopify-pages`, `shopify-menus`, `shopify-files` |
-| `page` | one page from `pages`: the first that isn't `done` or `skipped` | `section-library`; also `shopify-files` if it sets image settings |
+| `start` | `setup`, `push`, `storePages`, `menus`, `tokens`, `images` | `new-store-theme`, `shopify-store-content` (pages, menus, files) |
+| `page` | one page from `pages`: the first that isn't `done` or `skipped` | `section-library`; also `shopify-store-content` (files) if it sets image settings |
 | `finish` | `library`, `final` | `section-library` |
 
 - After **Resume** steps 1–4, run the first stage that still has a `pending`

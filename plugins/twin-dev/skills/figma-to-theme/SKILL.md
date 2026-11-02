@@ -363,7 +363,7 @@ stores with the `section-library` skill and reuse or port the closest match. Whe
 the page is built, record its `cc-` files there (`library.mjs add` and a `note`
 per new or changed entry).
 
-Content pages use the template names the `shopify-pages` skill chose, saved in
+Content pages use the template names the `shopify-store-content` skill (pages) chose, saved in
 `.twin-dev.json` under `pages` (`templateSuffix: "about"` →
 `templates/page.about.json`). Run that skill before building content pages, and
 never create a page template under a different name.
@@ -409,7 +409,7 @@ component to use and how it behaves.
   SALE`). Usually only in the mobile frame.
   - Build it with the `cc-header-quick-links` section in the header group,
     right after the header, with its own `Momentum - Mobile Quick Links` menu
-    (`shopify-menus`, "Mobile quick links").
+    (`shopify-store-content`, menus.md "Mobile quick links").
   - `layout_type` is always `carousel`.
   - `show_on_mobile` / `show_on_desktop` follow the frames that show it.
   - `link_style` is `text` or `button`, to match the design.
@@ -509,7 +509,7 @@ component to use and how it behaves.
     a real product through its product picker, not hardcoded text (see
     "Dynamic source first").
   - If a design shows a page of all looks, `cc-all-looks` on the `all-looks`
-    page is the place for it (`shopify-pages`).
+    page is the place for it (`shopify-store-content`, pages).
 
 When a design repeats a component that isn't on this list, and it's the same
 kind of thing across stores (a size guide link, a delivery estimate, a
@@ -550,7 +550,7 @@ measure it like any page: its spec comes from the home page elements it copies.
     copy `product_card_size`, `mobile_product_card_size`,
     `columns_gap_horizontal` and `columns_gap_vertical`.
 - **Visit the Store** (`templates/page.visit-the-store.json`, the page
-  `shopify-pages` creates). Its image, heading, text and Directions button
+  `shopify-store-content` pages creates). Its image, heading, text and Directions button
   live in the first section, and the map in the `custom-liquid` section:
   - **Address and hours**: take them from the design (footer, contact page,
     store locator) first. Otherwise open the store's public Google Maps
@@ -568,7 +568,7 @@ measure it like any page: its spec comes from the home page elements it copies.
   - **Feature image**: never download photos from Google Maps. They're
     covered by Google's terms and usually belong to whoever took them. Use a
     storefront image from the design if it has one (upload it with
-    `shopify-files`). Otherwise leave `image` empty and add a merchant to-do:
+    `shopify-store-content`, files). Otherwise leave `image` empty and add a merchant to-do:
     "Visit the Store: pick a storefront photo from the Google Maps listing
     (<listing URL>) or from the client, upload it to Content > Files, and set
     it on the page's image".
@@ -706,9 +706,9 @@ checked), and leave the comparison to the `qa-checker` agent.
 Do this before step 4 builds the header and footer.
 
 Read every menu in the design: header nav, mega menu, mobile drawer, footer
-columns, and utility or legal links. First run the `shopify-pages` skill, so every
+columns, and utility or legal links. First run the `shopify-store-content` skill's pages job, so every
 page the menus link to exists. Then create each menu in the Shopify admin with the
-`shopify-menus` skill. That skill names them `Momentum - <Menu name>` and links
+menus job. That skill names them `Momentum - <Menu name>` and links
 anything still missing (collections, products) to `#`. Then point the header and footer menu settings at the new
 menus as that skill's step 4 describes.
 

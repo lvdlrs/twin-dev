@@ -201,7 +201,7 @@ give the user the preview and editor URLs.
 
 Follow the `figma-to-theme` skill in the new folder, and `horizon-theme` for any
 code. New custom sections, blocks, snippets and assets use the `cc-` prefix.
-Menus from the design are created in the admin with `shopify-menus`, using the
+Menus from the design are created in the admin with `shopify-store-content` (menus), using the
 store domain from step 3. Any menu item or section link whose page or collection
 doesn't exist yet gets `#`.
 

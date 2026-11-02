@@ -51,10 +51,13 @@ whether the rule is already there (an earlier promotion, or a manual edit). If
 it is, the verdict is **Dismiss** ("already covered").
 
 Pick the file the rule belongs in. That's usually the entry's own skill, but a
-failure logged by `store-builder` while it followed `shopify-menus` belongs in
-`shopify-menus`. A query or API detail goes in the skill's `references/` file.
+failure logged by `store-builder` while it followed `shopify-store-content` belongs in that skill; the entry's
+**Area** line (`auth`, `pages`, `menus`, `files`) names the `references/` file.
+Older entries logged as `shopify-menus`, `shopify-pages`, `shopify-files` or
+`shopify-store-auth` map to `shopify-store-content` (menus, pages, files, auth).
+A query or API detail goes in the skill's `references/` file.
 A rule several skills need (an auth scope, for example) goes in each of them,
-and in `shopify-store-auth` if it's a scope.
+and in `shopify-store-content` `references/auth.md` if it's a scope.
 
 ## 3. Propose
 

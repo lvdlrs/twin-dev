@@ -1,12 +1,4 @@
----
-name: shopify-files
-description: Download images from a Figma design (logo, hero banners, collection and section images, icons), upload them to Shopify Files (Content > Files) with alt text, and use them in the theme's image settings. Use when the user asks to upload images or assets to Shopify, add alt text, or fill a theme's image pickers from a design.
-argument-hint: "[figma.com link | folder of images] [--store <store>.myshopify.com]"
-model: sonnet
-effort: medium
----
-
-# Shopify files
+# Files
 
 Get the images a design needs into **Content > Files** with alt text, then point
 the theme's image settings at them. Merchant images belong in Files or on
@@ -16,57 +8,11 @@ Keep downloads and the manifest in a work folder outside the theme, for example
 the scratchpad or `<project>/../<project>-images/`. Never put them in the theme
 folder.
 
-## Failure log
-
-Every twin-dev skill and agent records its failures in one shared file,
-`~/.claude/twin-dev/failures.md` (all stores, all runs).
-
-- **Before you start**, read your past entries and use the fixes recorded there
-  instead of repeating an approach that already failed:
-  `grep -n -A5 "· shopify-files ·" ~/.claude/twin-dev/failures.md` (no output or no
-  file means nothing recorded yet).
-- **When something fails**, append an entry straight away, not at the end, so
-  it's saved even if the run stops. Create the folder and file if missing.
-- A failure is: a command, CLI, API or MCP call that errored; a check or
-  validation that failed after a change; a step you had to retry or do another
-  way; a wrong assumption; anything the user corrected or rejected.
-- If a later attempt fixes an earlier `unresolved` entry, update its **Fix** line.
-- A **gap** isn't an error: the instructions had no rule for something you
-  met, so you worked it out or the user told you what to do. Log it as a gap
-  entry (below), so `improve-skills` can turn it into a rule.
-- Never write passwords, tokens, API keys or customer data into the log.
-
-Entry format (newest at the bottom):
-
-```markdown
-## YYYY-MM-DD · shopify-files · <store>.myshopify.com (or "no store")
-- **Tried:** what you were doing, with the command or tool
-- **Failed:** the error message or what went wrong, quoted short
-- **Cause:** why, if known
-- **Fix:** what worked, or `unresolved`
-```
-
-Gap entry:
-
-```markdown
-## YYYY-MM-DD · shopify-files · gap · <store>.myshopify.com (or "no store")
-- **Missing:** what the instructions didn't cover
-- **Did:** what you did, or what the user said to do
-```
-
 ## 0. Access
 
-Confirm the store domain (`<store>.myshopify.com`) with the user. Never guess it.
-Authenticate once, in the user's own terminal if it needs a browser:
-
-```bash
-shopify store auth --store <store>.myshopify.com --scopes read_files,write_files
-```
-
-The upload script uses `shopify store execute`. If the CLI isn't available, it
-uses `SHOPIFY_ADMIN_TOKEN`, or `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET`, as
-the `shopify-menus` skill describes. Don't ask the user to paste a token into
-the chat.
+Follow the shared access rules in [../SKILL.md](../SKILL.md). Scopes:
+`read_files`, `write_files`. The upload script uses `shopify store execute`, and
+falls back to the token variables described there.
 
 ## 1. Collect the images
 
@@ -153,8 +99,8 @@ Show the user a table and get a "yes" before uploading:
 Then dry-run, then upload:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/shopify-files/scripts/upload-files.mjs" <manifest.json> --store <store>.myshopify.com --dry-run
-node "${CLAUDE_PLUGIN_ROOT}/skills/shopify-files/scripts/upload-files.mjs" <manifest.json> --store <store>.myshopify.com
+node "${CLAUDE_PLUGIN_ROOT}/skills/shopify-store-content/scripts/upload-files.mjs" <manifest.json> --store <store>.myshopify.com --dry-run
+node "${CLAUDE_PLUGIN_ROOT}/skills/shopify-store-content/scripts/upload-files.mjs" <manifest.json> --store <store>.myshopify.com
 ```
 
 The script uploads, sets alt text, waits for Shopify to finish processing, and

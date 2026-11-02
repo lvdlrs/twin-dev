@@ -1,12 +1,4 @@
----
-name: shopify-menus
-description: Create, update, back up and restore navigation menus (Online Store > Navigation) in a Shopify store's admin through the Admin GraphQL API (Shopify CLI `store execute`). Use when the user asks to add, build, change, copy or import a header, footer, mega or mobile menu, or to set up navigation from a sitemap, Figma design or existing site.
-argument-hint: "[list | create | update | backup | restore] [--store <store>.myshopify.com]"
-model: sonnet
-effort: medium
----
-
-# Shopify menus
+# Menus
 
 You're a Shopify Theme Developer setting up the store's navigation: you create,
 update, back up and restore menus in the Shopify admin so the theme's header,
@@ -14,129 +6,20 @@ footer and mobile menus have the right links.
 
 Manage navigation menus in the Shopify admin through the Admin GraphQL API.
 Queries, mutations, item types and ID lookups are in
-[references/menu-graphql.md](references/menu-graphql.md). Read it before writing a
+[menu-graphql.md](menu-graphql.md). Read it before writing a
 request.
 
 Put query and variables files in your scratchpad or a temp directory, never in the
 theme folder.
 
-## Failure log
-
-Every twin-dev skill and agent records its failures in one shared file,
-`~/.claude/twin-dev/failures.md` (all stores, all runs).
-
-- **Before you start**, read your past entries and use the fixes recorded there
-  instead of repeating an approach that already failed:
-  `grep -n -A5 "· shopify-menus ·" ~/.claude/twin-dev/failures.md` (no output or no
-  file means nothing recorded yet).
-- **When something fails**, append an entry straight away, not at the end, so
-  it's saved even if the run stops. Create the folder and file if missing.
-- A failure is: a command, CLI, API or MCP call that errored; a check or
-  validation that failed after a change; a step you had to retry or do another
-  way; a wrong assumption; anything the user corrected or rejected.
-- If a later attempt fixes an earlier `unresolved` entry, update its **Fix** line.
-- A **gap** isn't an error: the instructions had no rule for something you
-  met, so you worked it out or the user told you what to do. Log it as a gap
-  entry (below), so `improve-skills` can turn it into a rule.
-- Never write passwords, tokens, API keys or customer data into the log.
-
-Entry format (newest at the bottom):
-
-```markdown
-## YYYY-MM-DD · shopify-menus · <store>.myshopify.com (or "no store")
-- **Tried:** what you were doing, with the command or tool
-- **Failed:** the error message or what went wrong, quoted short
-- **Cause:** why, if known
-- **Fix:** what worked, or `unresolved`
-```
-
-Gap entry:
-
-```markdown
-## YYYY-MM-DD · shopify-menus · gap · <store>.myshopify.com (or "no store")
-- **Missing:** what the instructions didn't cover
-- **Did:** what you did, or what the user said to do
-```
-
-## Store details
-
-Every store is different, so nothing here is hardcoded. This store's details live
-in `.twin-dev.json` in the project root (the folder with
-`config/settings_schema.json`):
-
-| Key | Example |
-|---|---|
-| `store` | `acme-coffee.myshopify.com` |
-| `themeId` | `123456789012` (the unpublished build theme) |
-| `figmaUrl` | `https://www.figma.com/design/<fileKey>/...` |
-
-Read it first. A value the user gives in this conversation wins; if it differs
-from the saved one, ask which is right. If a value is missing, ask for it once,
-then save it to the file so the next skill doesn't ask again. Never guess a store
-domain or reuse one from another project. Shopify CLI doesn't upload root files,
-so the file stays local.
-
 ## 0. Access
 
-Use `store` from `.twin-dev.json` and confirm it with the user before the first
-change. If you're not in a project folder or it's missing, ask for the
-`<store>.myshopify.com` domain. Never guess it.
-
-### Default: Shopify CLI store commands
-
-Check `shopify version` and that `shopify store execute --help` works. If the
-command doesn't exist, tell the user to update Shopify CLI, or use the fallback
-below.
-
-Authenticate once per store. The CLI opens a login, so ask the user to run it
-in their own terminal if it needs a browser:
-
-```bash
-shopify store auth --store <store>.myshopify.com --scopes read_online_store_navigation,write_online_store_navigation,read_products,read_content,read_legal_policies
-```
-
-Drop `read_products` / `read_content` if the menu doesn't link to products,
-collections, pages, blogs or articles. Drop `read_legal_policies` if the menu has
-no Shipping, Returns/Refund, Privacy or other policy items. Re-run `store auth` if a command fails
-because the token is missing, expired or lacks a scope.
-
-Run requests:
-
-```bash
-# read
-shopify store execute --store <store>.myshopify.com --query-file <file.graphql> [--variable-file <vars.json>] --json
-# write (only after the user confirms the plan, section 2)
-shopify store execute --store <store>.myshopify.com --query-file <file.graphql> --variable-file <vars.json> --allow-mutations --json
-```
-
-Never add `--allow-mutations` to a read. Add `--version <yyyy-mm>` only if the
-store needs a specific API version; the default is the latest stable one.
-Check `userErrors` in every mutation response; the command can succeed while
-Shopify rejects the input.
-
-### Validate first (optional)
-
-If the Shopify Dev MCP tools are available (`@shopify/dev-mcp`), validate each
-query and mutation against the Admin schema before running it. It never touches
-the store.
-
-### Fallback: token script
-
-If `store execute` isn't available, use the bundled script:
-
-```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/shopify-menus/scripts/admin-graphql.mjs" <query.graphql> [variables.json]
-```
-
-It needs `SHOPIFY_STORE` and either `SHOPIFY_ADMIN_TOKEN` (`shpat_...` from an
-existing custom app) or `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET` (a Dev
-Dashboard app installed on a store in the same organization), with the scopes
-above. It exits non-zero on `userErrors`.
-
-- If the variables aren't set, tell the user which ones to set in their own
-  terminal. Don't ask them to paste a token or secret into the chat, and never
-  write one into a file or command.
-- If there's no access at all, use section 6.
+Follow the shared access rules in [../SKILL.md](../SKILL.md). Scopes:
+`read_online_store_navigation`, `write_online_store_navigation`, plus
+`read_products` / `read_content` if the menu links to products, collections,
+pages, blogs or articles, and `read_legal_policies` if it has Shipping,
+Returns/Refund, Privacy or other policy items. Writes only after the user
+confirms the plan (section 2).
 
 ## 1. Read what's there
 
@@ -155,7 +38,7 @@ a Figma frame (use the Figma MCP tools to read the nav), or another menu.
 1. Resolve every link to a type and target. Prefer resource types (`COLLECTION`,
    `PAGE`, `PRODUCT`, `BLOG`, ...) over `HTTP` so links survive handle changes.
    Use `HTTP` only for external links, anchors and paths with no resource.
-2. For pages, run the `shopify-pages` skill first, so the pages the menu links
+2. For pages, read [pages.md](pages.md) first, so the pages the menu links
    to exist. Use the page IDs saved in `.twin-dev.json` under `pages`, keyed by
    handle; look up anything else by handle.
    Look up resource IDs by handle with the queries in the reference. When a

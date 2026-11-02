@@ -34,11 +34,8 @@ Bump `version` in `plugins/twin-dev/.claude-plugin/plugin.json` when you release
 | `/twin-dev:shopify-theme-deploy` | Safe preview / push / pull / publish with Shopify CLI. Manual only. |
 | `/twin-dev:new-store-theme` | Start a store build: copy the base Horizon theme into a new project folder, name it `<Store> x Hv<version>(Momentum in progress...)`, push it into a target theme ID (Horizon added from the Theme Store, so it keeps update notices) or as a new unpublished theme, then build the Figma design. |
 | `/twin-dev:figma-to-theme` | Pull colours, type, spacing and layouts from Figma into theme settings and sections. Each section is built against a spec, measured in the browser and fixed until it matches 1:1 (see [Design match](#design-match)). Recurring store components (quick links bar, purchase benefits, stock alert, Instagram feed) are built with set theme components. |
-| `/twin-dev:shopify-store-auth` | Connect Shopify CLI to a store: check the CLI, log in for theme pushes, authorize menu, page and file scopes, and verify. Run it before the first build on each store. |
-| `/twin-dev:shopify-files` | Download images from Figma, upload them to Shopify Files with alt text, and set them in the theme's image settings. Instagram feed images are skipped: the `cc-instafeed` block pulls them from the Instafeed app. |
-| `/twin-dev:shopify-pages` | Create the pages the design links to (plus Visit the Store, All Looks, All Brands), match their templates to the live theme's names, and add missing templates to live as copies of its `page.json`. Run before `shopify-menus`. |
 | `/twin-dev:section-library` | Search and reuse `cc-` sections from past stores (client-customized copies and older base versions included), port them to this project's base, and record new builds. Run `library.mjs scan` once to index past projects. |
-| `/twin-dev:shopify-menus` | Create, update, back up and restore navigation menus in the Shopify admin (via `shopify store execute`). Shipping, Returns and Privacy items link to the store's policies, or `#` if a policy isn't set up. A quick links row under the header gets its own `Momentum - Mobile Quick Links` menu on the `cc-header-quick-links` section. |
+| `/twin-dev:shopify-store-content` | One skill for the store admin work, with a reference per job. **auth**: connect Shopify CLI, log in, authorize scopes, spot expired tokens (Admin API tokens last about 24 hours). **pages**: create the pages the design links to (plus Visit the Store, All Looks, All Brands), match their templates to the live theme's names, add missing templates to live as copies of its `page.json`. **menus**: create, update, back up and restore navigation menus; Shipping, Returns and Privacy items link to the store's policies, or `#` if a policy isn't set up; a quick links row under the header gets its own `Momentum - Mobile Quick Links` menu on the `cc-header-quick-links` section. **files**: download images from Figma, upload them to Shopify Files with alt text, set them in the theme's image settings (Instagram feed images are skipped: the `cc-instafeed` block pulls them from the Instafeed app). Run auth before the first build on each store. |
 | `/twin-dev:improve-skills` | Turn the failure log's repeated failures, user corrections and gaps into rules in the skills and agents (edits the repo after you approve), and mark those entries as promoted. |
 
 ### Agents
@@ -80,7 +77,7 @@ Anything else in the message (a font, a colour, a page to skip, "rebuild the
 home page") is saved as an answer and used for the rest of the build. Inputs
 are saved to `.twin-dev.json`, so a later run only needs the store name.
 
-For a new store, run `/twin-dev:shopify-store-auth <store>.myshopify.com` first
+For a new store, run `/twin-dev:shopify-store-content auth <store>.myshopify.com` first
 so the build doesn't stop for a login.
 
 A build runs in stages to keep token use down: `start` (setup, push, pages,
@@ -232,7 +229,8 @@ Before starting, each one reads its own past entries and reuses the recorded
 fixes instead of repeating a failed approach.
 
 ```markdown
-## 2026-10-15 · shopify-menus · acme-coffee.myshopify.com
+## 2026-10-15 · shopify-store-content · acme-coffee.myshopify.com
+- **Area:** menus
 - **Tried:** shopify store execute menuCreate
 - **Failed:** "Access denied for menuCreate field"
 - **Cause:** CLI app missing write_online_store_navigation scope
@@ -249,7 +247,8 @@ never logged.
 worked it out or the user said what to do.
 
 ```markdown
-## 2026-10-19 · shopify-menus · gap · acme-coffee.myshopify.com
+## 2026-10-19 · shopify-store-content · gap · acme-coffee.myshopify.com
+- **Area:** menus
 - **Missing:** no rule for Shipping / Returns / Privacy menu items
 - **Did:** linked them to the store policies, "#" when a policy is missing
 ```

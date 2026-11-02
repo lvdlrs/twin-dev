@@ -1,82 +1,20 @@
----
-name: shopify-pages
-description: Create the store's pages (Online Store > Pages) a Figma design links to, and give each one the right page template - matching our theme's template names to the live theme's, and adding a missing template to the live theme as a copy of its page.json so it can be assigned. Includes the standard Visit the Store, All Looks and All Brands pages. Use before creating menus, when the user asks to create or set up pages, assign page templates, or fix menu items linked to "#" because a page is missing.
-argument-hint: "[figma.com link] [--store <store>.myshopify.com]"
-model: sonnet
-effort: medium
----
-
-# Shopify pages
+# Pages
 
 You're a Shopify Theme Developer making sure every page the design links to
 exists in the store and uses the right template, so menus can link to real
-pages instead of `#`. Run this **before** `shopify-menus`.
+pages instead of `#`. Do this **before** [menus.md](menus.md).
 
 A page's template is stored on the page (`templateSuffix`: `about` means
 `templates/page.about.json`) and shared by every theme. So the name must be one
 the live theme has, and our theme must use the same name.
 
-## Failure log
-
-Every twin-dev skill and agent records its failures in one shared file,
-`~/.claude/twin-dev/failures.md` (all stores, all runs).
-
-- **Before you start**, read your past entries and use the fixes recorded there
-  instead of repeating an approach that already failed:
-  `grep -n -A5 "· shopify-pages ·" ~/.claude/twin-dev/failures.md` (no output or no
-  file means nothing recorded yet).
-- **When something fails**, append an entry straight away, not at the end, so
-  it's saved even if the run stops. Create the folder and file if missing.
-- A failure is: a command, CLI, API or MCP call that errored; a check or
-  validation that failed after a change; a step you had to retry or do another
-  way; a wrong assumption; anything the user corrected or rejected.
-- If a later attempt fixes an earlier `unresolved` entry, update its **Fix** line.
-- A **gap** isn't an error: the instructions had no rule for something you
-  met, so you worked it out or the user told you what to do. Log it as a gap
-  entry (below), so `improve-skills` can turn it into a rule.
-- Never write passwords, tokens, API keys or customer data into the log.
-
-Entry format (newest at the bottom):
-
-```markdown
-## YYYY-MM-DD · shopify-pages · <store>.myshopify.com (or "no store")
-- **Tried:** what you were doing, with the command or tool
-- **Failed:** the error message or what went wrong, quoted short
-- **Cause:** why, if known
-- **Fix:** what worked, or `unresolved`
-```
-
-Gap entry:
-
-```markdown
-## YYYY-MM-DD · shopify-pages · gap · <store>.myshopify.com (or "no store")
-- **Missing:** what the instructions didn't cover
-- **Did:** what you did, or what the user said to do
-```
-
-## Store details
-
-Read `.twin-dev.json` in the project root (`store`, `figmaUrl`, `themeId`). A
-value the user gives in this conversation wins; if it differs from the saved
-one, ask which is right. Never guess a store domain.
-
 Work in the project folder (our theme). Never edit the base theme folder.
 
 ## 0. Access
 
-Admin API scopes `read_content` and `write_content` (pages), plus theme access
-for the live theme. If `shopify store execute` or `shopify theme list` fails for
-auth, run the `shopify-store-auth` skill first.
-
-Run requests as the `shopify-menus` skill does:
-
-```bash
-shopify store execute --store <store>.myshopify.com --query-file <file.graphql> [--variable-file <vars.json>] --json
-# writes only, after the plan is approved (step 4)
-shopify store execute --store <store>.myshopify.com --query-file <file.graphql> --variable-file <vars.json> --allow-mutations --json
-```
-
-Check `userErrors` in every mutation response.
+Follow the shared access rules in [../SKILL.md](../SKILL.md). Scopes:
+`read_content` and `write_content` (pages), plus theme access for the live
+theme. Writes only after the plan is approved (step 4).
 
 ## 1. List the pages the design needs
 
@@ -84,7 +22,7 @@ Read every menu in the Figma design: header nav, mega menu, mobile drawer,
 footer columns, plus buttons and links in page frames. Keep each link that
 points to a **page**: About, Contact, FAQ, Stockists, Our Story and the like.
 Leave out collections, products, blogs and articles, policies, search, cart,
-account and external links; `shopify-menus` handles those.
+account and external links; [menus.md](menus.md) handles those.
 
 Add the standard pages:
 
@@ -212,7 +150,7 @@ In this order, so no page points at a template that doesn't exist:
 ## 6. Save and report
 
 Save every page to `.twin-dev.json` under `pages`, keyed by handle, so
-`shopify-menus` links to them and later runs don't redo them:
+menus link to them and later runs don't redo them:
 
 ```json
 "pages": {
@@ -230,4 +168,4 @@ Report:
   saved name);
 - **Merchant to-do**: add content to each new page, which are published and empty.
 
-Then continue with `shopify-menus`.
+Then continue with [menus.md](menus.md).
