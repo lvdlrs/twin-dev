@@ -256,7 +256,17 @@ Save each one to `build.decisions` (step, topic, choice, why) as you make it.
   - **Quick links bar**: the `cc-header-quick-links` section, always a
     carousel, with its own menu.
   - **Purchase benefits / USPs**: the `product-usp` block. A stock row always
-    has `tie_to_inventory` on and `set_threshold` off.
+    has `tie_to_inventory` on and `set_threshold` off. A dot or custom marker
+    instead of an icon is exported as SVG, uploaded to Files and set in the
+    row's `image_upload`.
+  - **Tabbed products**: one tab per frame tab, products per tab at the
+    section's maximum, carousel on desktop, mobile follows the mobile frame
+    (default carousel).
+  - **Testimonials**: dots, arrows or a counter on one visible item mean
+    several items. Duplicate the item to that count and list it under copy
+    needed.
+  - **Product card image ratio**: `portrait` when the frame's card image is
+    taller than wide. `adapt` only when card images clearly differ in shape.
   - **Stock alert**: reuse a product block that can match the design.
     Otherwise create a `cc-` block that is tied to inventory and shows only at
     or below its threshold. Record which one you used as a decision.

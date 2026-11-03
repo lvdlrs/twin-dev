@@ -386,6 +386,11 @@ stays local.
   and its children (gallery, title, price, swatches, quick shop) once. Then reuse
   that setup in every section that shows cards; the inventory's block trees show
   which ones do.
+  - **Card image ratio.** Measure the card image in the frame. If it is taller
+    than wide, set the card's image ratio to `portrait`. Use `square` or
+    `landscape` when the frame is that shape. Use `adapt` (follows each
+    product's own image) only when the frame's card images clearly differ in
+    shape from card to card, which is rare. Never use it as the default.
 - Product data on a card (vendor, type, SKU, or any other product field the
   card has no block for): add a `text` block inside the card and connect its
   `text` setting to the dynamic source (e.g. product vendor). Never use a
@@ -423,6 +428,13 @@ component to use and how it behaves.
     or `image_upload` when none fits.
   - Only keep the preset's rows that the design shows, and skip rows in the
     frame that have an icon but no text.
+  - **Dot or custom marker instead of an icon.** Some designs lead a row with
+    a plain dot, bullet, tick or other small marker that the icon list doesn't
+    have. Don't pick the nearest built-in icon and don't skip it. Export the
+    marker from Figma as SVG (keep its fill and any glow or shadow, and its
+    frame size), upload it to Shopify Files (`shopify-store-content`, files),
+    and set it in the row's `image_upload` slot. Use the one file for every
+    row that has the same marker.
   - A **stock row** (in stock, ready to ship, available now) always has
     `tie_to_inventory: true` and `set_threshold: false`. It then shows only
     while the selected variant is in stock and hides when it's sold out.
@@ -487,6 +499,30 @@ component to use and how it behaves.
     own image. Keep `media_type_1` on `image`.
   - Show the slide controls (arrows, dots) only if the design draws them. A
     one-slide banner has none.
+- **Tabbed product content.** A row of tabs or filters (collection names,
+  categories, "New / Best sellers / Sale") above a product grid or carousel,
+  where each tab shows its own products.
+  - Use the theme's tabbed products section or blocks, one tab per tab in the
+    frame, each connected to a real collection (`#` link rule applies if the
+    collection is missing).
+  - Set the products shown per tab to the section's maximum (10 in the base
+    theme), not the number of cards the frame happens to draw. The frame shows
+    a viewport; the merchant's collection has more.
+  - Desktop is always a carousel, even when the frame shows only as many cards
+    as fit. On mobile, follow the mobile frame: grid if it shows a grid,
+    carousel if it shows a row that runs off the edge. With no mobile frame,
+    default to a carousel.
+  - Show arrows or dots only if the frame draws them.
+- **Testimonials and reviews.** A quote or review block, as a row of cards or
+  as a single quote with navigation dots or arrows.
+  - Dots, arrows or a counter ("1 / 4") on a single visible item mean the
+    design is a carousel with several items. Count the dots (or read the
+    counter) and build that many items, even though the frame shows one.
+  - When the frame gives the copy for only the visible item, duplicate that
+    item to reach the count, keep the design's text and star rating, and list
+    the section under "copy needed" so the merchant replaces the duplicates.
+    Don't invent new quotes, names or ratings.
+  - Without dots or arrows, build exactly the items shown.
 - **Instagram feed.** A grid or row of Instagram posts, usually with an
   `@handle` or a "Follow us" heading.
   - Use the `section` **Instafeed** preset, whose `cc-instafeed` block is the
@@ -658,7 +694,8 @@ exact match for a Figma section. Write the mapping out like this:
     `space-between` and `vertical_alignment` from the design (usually
     `flex-end`), so the link stays a real block the merchant can edit.
 - Components in **Recurring store components** (quick links bar, purchase
-  benefits, stock alert, Instagram feed) follow the rules there.
+  benefits, stock alert, tabbed products, testimonials, Instagram feed) follow
+  the rules there.
 - Use the theme's settings as far as they go: global settings, then section and
   block settings. Only create a new section, block, snippet or asset when no
   existing one can build the component. Name it with a `cc-` prefix
