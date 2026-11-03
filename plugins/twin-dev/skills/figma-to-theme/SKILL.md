@@ -705,6 +705,18 @@ exact match for a Figma section. Write the mapping out like this:
   instance. Never edit a stock (non-`cc-`) file for it: list it as a `manual`
   fix. Follow the fix ladder in design-match step 4.
 - Keep section IDs in templates stable when editing an existing template.
+- **Name every section** so it's easy to find in the theme editor's section
+  list. Give each section instance in a template or section group (header,
+  footer) a `name` key beside its `type`, in plain words that say what the
+  section is on this page: the Figma section's heading or role ("Hero",
+  "Shop by Occasion", "Testimonials", "Newsletter signup", "Footer legal",
+  "Announcement bar"). Do this for every section, including stock types such
+  as `slideshow`, `main-collection`, `product-information`, `main-404` and
+  `search-results` and every `cc-` section, not only the generic `section`
+  type. Two sections of the same type get different names. Keep names short
+  and don't repeat the page name. Don't change a name the merchant set, and
+  don't use a `t:` key for it. This is only the `name` key on the section;
+  blocks keep their own labels.
 - Links (buttons, cards, images, text links): point them at the real resource
   (`shopify://collections/<handle>`, `shopify://pages/<handle>`, ...) when it
   exists in the store. When it doesn't exist yet, or you can't check the store, set

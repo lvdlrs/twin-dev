@@ -265,6 +265,10 @@ Save each one to `build.decisions` (step, topic, choice, why) as you make it.
   - **Testimonials**: dots, arrows or a counter on one visible item mean
     several items. Duplicate the item to that count and list it under copy
     needed.
+  - **Section names**: every section in a template or section group gets a
+    plain `name` (the Figma section's role, such as "Hero" or "Footer legal"),
+    so it's easy to find in the theme editor. Stock types and `cc-` sections
+    included.
   - **Product card image ratio**: `portrait` when the frame's card image is
     taller than wide. `adapt` only when card images clearly differ in shape.
   - **Stock alert**: reuse a product block that can match the design.
