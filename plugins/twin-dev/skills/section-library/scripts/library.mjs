@@ -35,6 +35,7 @@
 // `baseUpdated` is true when the base theme's file has changed since that version.
 
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { findSecrets, forbiddenFile } from "../../../scripts/secret-scan.mjs";
 import { execFileSync } from "node:child_process";
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
@@ -155,6 +156,12 @@ function indexProject(index, folder, base) {
 
   index.entries = index.entries.filter((e) => e.project !== folder).concat(entries);
   for (const file of ccFiles) {
+    // The library is shared across stores, so a client's key must never be copied into it.
+    const hits = findSecrets(readFileSync(join(folder, file), "utf8"));
+    if (forbiddenFile(file) || hits.length) {
+      console.error(`Not saved to the library: ${storeSlug}/${file} has a possible secret${hits.length ? ` (${hits.map((h) => `line ${h.line}: ${h.rule}`).join(", ")})` : ""}. Move the value into a theme setting, then run add again.`);
+      continue;
+    }
     const target = join(libraryDir, storeSlug, file);
     mkdirSync(dirname(target), { recursive: true });
     cpSync(join(folder, file), target);

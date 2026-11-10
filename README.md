@@ -221,6 +221,41 @@ with `/mcp`. The config in `plugins/twin-dev/.mcp.json` uses `cmd /c npx` for
 Windows; on macOS or Linux change it to `"command": "npx"` with
 `["-y", "@shopify/dev-mcp@latest"]`.
 
+## Secrets and boundaries
+
+No token, API key, client secret, password or private link may appear in this
+repo, in a skill or agent, in a store's theme files, in a report, or in the chat.
+Every skill and agent carries the same **Secrets** section; this is the full rule.
+
+**What counts as a secret:** Admin API tokens (`shpat_`, `shpca_`, `shpss_`,
+`shptka_`), client IDs and secrets, Figma and other API tokens, storefront and
+theme-access passwords, and links that carry a key (`?key=`, `preview_key=`).
+Customer data is handled the same way. A design token (colour, font size) is not a secret.
+
+| Where | Rule |
+|---|---|
+| Chat | Never ask the user to paste a secret. They log in (`shopify store auth`) or set environment variables in their own terminal. |
+| Files | Never write a secret into `.twin-dev.json`, theme files, `settings_data.json`, query or variable files, scripts, skills, agents, library entries, the failure log or a report. Name it by variable (`SHOPIFY_ADMIN_TOKEN`), never by value. |
+| Output | Never `cat` or `echo` `.env` files, `shopify.theme.toml`, environment variables or raw auth output. Read only the fields needed (store, scopes, `expiresAt`). `admin-graphql.mjs` and `upload-files.mjs` redact tokens from error text. |
+| Storefront password | Used for the run and never saved. `.twin-dev.json` holds the store, theme ID and Figma link only. |
+| Library | `section-library` skips any `cc-` file that holds a possible secret, so one client's key never lands in the library shared by every store. |
+| Found one | Don't repeat it. Say which file or step it was in, redact it, and tell the user to rotate it if it may have been exposed. |
+
+**Enforced, not just written:**
+
+- `plugins/twin-dev/scripts/secret-scan.mjs` finds tokens, keys, passwords and
+  keyed URLs, and file types that hold them (`.env`, `*.pem`, `shopify.theme.toml`,
+  `.twin-dev.json`, `failures.md`). It never prints a secret in full. Run
+  `node plugins/twin-dev/scripts/secret-scan.mjs` for the whole repo, or
+  `--staged` for what is about to be committed. A deliberate example can end its
+  line with `secret-scan: allow`.
+- `.githooks/pre-commit` runs the staged scan and blocks the commit. Turn it on
+  once per clone: `git config core.hooksPath .githooks`.
+- `.gitignore` excludes the secret-bearing files above.
+
+If a secret was ever committed or pushed, removing it in a new commit isn't enough:
+rotate it first, then clean the history.
+
 ## Failure log
 
 Every skill and agent records what went wrong in one shared file on each computer:

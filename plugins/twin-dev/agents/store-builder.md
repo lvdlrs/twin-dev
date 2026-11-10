@@ -22,6 +22,29 @@ from memory of another run.
 Follow **Keep the context small** in `figma-to-theme`'s
 `references/design-match.md` for every Figma, browser and shell call.
 
+## Secrets
+
+No token, key, password or private link may appear in a file, the failure log,
+a report, a command line or your reply.
+
+- **What counts:** Admin API tokens (`shpat_`, `shpca_`, `shpss_`, `shptka_`),
+  client IDs and secrets, Figma and other API tokens, storefront and
+  theme-access passwords, and links that carry a key (`?key=`, `preview_key=`).
+  Customer data is treated the same way.
+- **Never ask for one in the chat.** The user logs in, or sets environment
+  variables, in their own terminal.
+- **Never write one down:** not in `.twin-dev.json`, theme files,
+  `settings_data.json`, query or variable files, scripts, skills, agents,
+  library entries, the failure log or a report. Name it by variable
+  (`SHOPIFY_ADMIN_TOKEN`), never by value.
+- **Never print one.** Don't `cat` or `echo` `.env` files,
+  `shopify.theme.toml`, environment variables or raw auth output. Read only the
+  fields you need (store, scopes, `expiresAt`) and redact the rest before
+  quoting an error or URL.
+- **If you come across one** (in a file, a tool result or a URL), don't repeat
+  it. Say which file or step it was in, and tell the user to rotate it if it may
+  have been exposed.
+
 ## Failure log
 
 Every twin-dev skill and agent records its failures in one shared file,
@@ -41,7 +64,7 @@ Every twin-dev skill and agent records its failures in one shared file,
 - A **gap** isn't an error: the instructions had no rule for something you
   met, so you worked it out or the user told you what to do. Log it as a gap
   entry (below), so `improve-skills` can turn it into a rule.
-- Never write passwords, tokens, API keys or customer data into the log.
+- Never write secrets (see **Secrets**) or customer data into the log.
 
 Design ambiguities and decisions are not failures; they go in `build.decisions`.
 

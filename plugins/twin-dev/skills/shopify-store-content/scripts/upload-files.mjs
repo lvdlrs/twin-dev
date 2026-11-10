@@ -258,7 +258,15 @@ function normaliseStore(value) {
   return host.endsWith(".myshopify.com") ? host : `${host}.myshopify.com`;
 }
 
+// Error text ends up in the chat transcript, so strip anything token-shaped first.
+function redact(text) {
+  const secrets = [process.env.SHOPIFY_ADMIN_TOKEN, process.env.SHOPIFY_CLIENT_SECRET, process.env.SHOPIFY_CLIENT_ID, cachedToken].filter(Boolean);
+  return secrets
+    .reduce((out, secret) => out.split(secret).join("[redacted]"), String(text))
+    .replace(/\bshp(?:at|ca|ss|pa|ua|tka)_[A-Za-z0-9]+/g, "[redacted]");
+}
+
 function fail(message) {
-  console.error(message);
+  console.error(redact(message));
   process.exit(1);
 }

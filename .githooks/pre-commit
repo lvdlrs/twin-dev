@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blocks a commit that stages a token, API key, password or private link.
+# Enable once per clone:  git config core.hooksPath .githooks
+exec node "$(git rev-parse --show-toplevel)/plugins/twin-dev/scripts/secret-scan.mjs" --staged

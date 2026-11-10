@@ -51,6 +51,9 @@ Check the stored auth. It's local, read-only and needs no browser:
 shopify store auth list --no-input --json
 ```
 
+Read only `store`, `scopes`, `expiresAt` and `refreshTokenExpiresAt` from the
+output. If it holds anything token-shaped, don't quote or log it.
+
 Find the session whose `store` is this store. Then:
 
 - **No session for the store:** never authorized. Step 4.

@@ -17,15 +17,27 @@
 
 import { readFileSync } from "node:fs";
 
+// Error text ends up in the chat transcript, so strip anything token-shaped first.
+function redact(text) {
+  const secrets = [process.env.SHOPIFY_ADMIN_TOKEN, process.env.SHOPIFY_CLIENT_SECRET, process.env.SHOPIFY_CLIENT_ID].filter(Boolean);
+  return secrets
+    .reduce((out, secret) => out.split(secret).join("[redacted]"), String(text))
+    .replace(/\bshp(?:at|ca|ss|pa|ua|tka)_[A-Za-z0-9]+/g, "[redacted]");
+}
+
+function report(message) {
+  console.error(redact(message));
+}
+
 const [queryPath, variablesPath] = process.argv.slice(2);
 if (!queryPath) {
-  console.error("Usage: node admin-graphql.mjs <query.graphql> [variables.json]");
+  report("Usage: node admin-graphql.mjs <query.graphql> [variables.json]");
   process.exit(2);
 }
 
 const store = (process.env.SHOPIFY_STORE || "").replace(/^https?:\/\//, "").replace(/\/.*$/, "");
 if (!store) {
-  console.error("Set SHOPIFY_STORE to the store subdomain or <store>.myshopify.com.");
+  report("Set SHOPIFY_STORE to the store subdomain or <store>.myshopify.com.");
   process.exit(2);
 }
 const shop = store.endsWith(".myshopify.com") ? store : `${store}.myshopify.com`;
@@ -35,7 +47,7 @@ async function getToken() {
   if (process.env.SHOPIFY_ADMIN_TOKEN) return process.env.SHOPIFY_ADMIN_TOKEN;
   const { SHOPIFY_CLIENT_ID: clientId, SHOPIFY_CLIENT_SECRET: clientSecret } = process.env;
   if (!clientId || !clientSecret) {
-    console.error("Set SHOPIFY_ADMIN_TOKEN, or SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET.");
+    report("Set SHOPIFY_ADMIN_TOKEN, or SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET.");
     process.exit(2);
   }
   const res = await fetch(`https://${shop}/admin/oauth/access_token`, {
@@ -48,7 +60,7 @@ async function getToken() {
     }),
   });
   if (!res.ok) {
-    console.error(`Token request failed: HTTP ${res.status} ${await res.text()}`);
+    report(`Token request failed: HTTP ${res.status} ${await res.text()}`);
     process.exit(1);
   }
   return (await res.json()).access_token;
@@ -68,7 +80,7 @@ const res = await fetch(`https://${shop}/admin/api/${apiVersion}/graphql.json`, 
 
 const text = await res.text();
 if (!res.ok) {
-  console.error(`HTTP ${res.status}: ${text}`);
+  report(`HTTP ${res.status}: ${text}`);
   process.exit(1);
 }
 

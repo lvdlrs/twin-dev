@@ -77,13 +77,18 @@ Rules for the edits:
   failure happened), not in a new "Lessons" section at the end.
 - Change an existing line when it's wrong; don't add a second line that
   contradicts it.
-- Never copy store domains, customer data, tokens or keys into a skill.
+- Never copy store domains, customer data, tokens or keys into a skill. Failure
+  entries can quote an error that held one; redact it (`[redacted]`) before it
+  goes into a rule or a proposal, and tell the user to rotate it if it may have
+  been exposed.
 
 Wait for the user's yes. They can approve all of it, some of it, or reword it.
 
 ## 4. Apply
 
 1. Edit the approved files in the repo.
+   Then run `node plugins/twin-dev/scripts/secret-scan.mjs`. It must report no
+   secrets before you commit.
 2. If a skill or agent was added or its description changed, update `README.md`.
 3. Bump the minor version in `plugins/twin-dev/.claude-plugin/plugin.json` once
    per run (`1.8.0` → `1.9.0`).

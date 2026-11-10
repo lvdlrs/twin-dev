@@ -1,1 +1,15 @@
 .playwright-mcp/
+
+# Secrets and per-store state: never commit these
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.har
+.twin-dev.json
+shopify.theme.toml
+.shopify/
+failures.md
+settings.local.json
