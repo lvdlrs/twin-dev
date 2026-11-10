@@ -104,6 +104,11 @@ Gap entry:
 - Merchant strings escaped; UI text from locales, not hardcoded.
 - CSS in the owner's `{% stylesheet %}`; theme tokens instead of raw colours;
   logical properties; shared style-owner renders preserved.
+- Styling for a stock section or block lives in its Custom CSS (`custom_css`)
+  or the global Custom CSS, not in a stock file. Flag Custom CSS that repeats
+  something an existing section or block setting can do (padding, gap, colour,
+  size, line-height preset, hidden `_mobile` settings), and per-instance rules
+  that should be global (or the reverse).
 - Unique IDs include `section.id` or `block.id`.
 
 **Accessibility and performance**

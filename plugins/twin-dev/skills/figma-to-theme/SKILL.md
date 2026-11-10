@@ -719,14 +719,27 @@ exact match for a Figma section. Write the mapping out like this:
 - Components in **Recurring store components** (quick links bar, purchase
   benefits, stock alert, tabbed products, testimonials, Instagram feed) follow
   the rules there.
-- Use the theme's settings as far as they go: global settings, then section and
-  block settings. Only create a new section, block, snippet or asset when no
-  existing one can build the component. Name it with a `cc-` prefix
-  (`sections/cc-feature-banner.liquid`) and follow the `horizon-theme` skill.
-- Styling that no setting can reach goes in the owner `cc-` section or block's
-  own `{% stylesheet %}` tag, or becomes a new setting when it varies per
-  instance. Never edit a stock (non-`cc-`) file for it: list it as a `manual`
-  fix. Follow the fix ladder in design-match step 4.
+- **Maximize the section and block settings.** Use the theme's settings as far
+  as they go: global settings, then every setting on the section and on each
+  block in its tree, including the ones hidden behind a parent setting, the
+  `_mobile` twins and the layout you can build by nesting `group` and `spacer`
+  blocks. Follow "Maximize the section and block settings first" in
+  `references/design-match.md` before adding anything. Only create a new
+  section, block, snippet or asset when no existing one can build the
+  component. Name it with a `cc-` prefix (`sections/cc-feature-banner.liquid`)
+  and follow the `horizon-theme` skill.
+- Styling that no setting can reach, after the settings are used up:
+  - On a stock (non-`cc-`) section or block, add it to Custom CSS: the
+    section's or block's own **Custom CSS** (`custom_css` in its template or
+    group JSON) when it's exclusive to that instance, or the theme's **global
+    Custom CSS** (`current.custom_css` in `config/settings_data.json`) when
+    several instances or pages share it. Never edit a stock file for it.
+  - In a `cc-` section or block we build, use its own `{% stylesheet %}`, or a
+    new setting when it varies per instance.
+  - Only a change CSS can't make (markup, Liquid, JS, a new setting on a stock
+    schema) is a `manual` fix.
+
+  Follow the fix ladder in design-match step 4.
 - Keep section IDs in templates stable when editing an existing template.
 - **Name every section** so it's easy to find in the theme editor's section
   list. Give each section instance in a template or section group (header,
@@ -823,8 +836,8 @@ Finish with:
 - menus created, and every menu item or section link set to `#`, with what it
   should link to;
 - the design match for each page: elements measured, mismatches fixed by
-  setting, by new `cc-` file, by `{% stylesheet %}` CSS and by new setting, and
-  what remains with its label (`manual`, `content`, `theme limit`, `design`);
+  setting, by new `cc-` file, by `{% stylesheet %}` CSS, by section or block
+  Custom CSS, by global Custom CSS and by new setting, and what remains with its label (`manual`, `content`, `theme limit`, `design`);
 - the **Manual fixes** list: every mismatch that needs a stock (non-`cc-`) file
   change, with the element, Figma vs live value, owner file and suggested
   change;

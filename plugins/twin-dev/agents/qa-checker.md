@@ -350,9 +350,12 @@ For every discrepancy, say what causes it and where to fix it:
 - `setting`: a theme or section setting is wrong; name the setting
   (`type_size_h1`, the section's `padding-block-start`) and the value to set.
 - `code`: needs a Liquid/CSS/JS change; give `path:line` if you can find it.
-  Name the fix-ladder level from design-match step 4: CSS in the owner `cc-`
-  section or block's `{% stylesheet %}`, a new setting, a new `cc-` file, or
-  `manual` when the change belongs in a stock (non-`cc-`) file.
+  Name the fix-ladder level from design-match step 4: an existing section or
+  block setting (check them all first, including hidden and `_mobile` ones),
+  Custom CSS on that section or block (exclusive to it) or in the global
+  Custom CSS (shared), CSS in the owner `cc-` section or block's
+  `{% stylesheet %}`, a new setting, a new `cc-` file, or `manual` when the
+  change needs markup, Liquid, JS or a stock schema change that CSS can't make.
 - `content`: store content differs from the design (image, product title,
   menu item, copy in a block).
 - `theme limit`: the theme can't do it without custom code (a setting doesn't

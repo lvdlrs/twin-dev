@@ -114,6 +114,8 @@ lists. If it isn't connected, fall back to shopify.dev and say so.
 | Schema labels/help | `locales/en.default.schema.json` + `t:` keys |
 | Merchant-owned copy/media/links | settings, blocks, resources or metafields, never hardcoded |
 | Static component CSS | the owner file's single `{% stylesheet %}` tag |
+| Styling for one stock section or block instance that no setting reaches | that instance's Custom CSS (`custom_css` in its template or group JSON), not the stock file |
+| Same styling shared across a stock component site-wide | the theme's global Custom CSS (`current.custom_css` in `config/settings_data.json`, append only) |
 | Per-instance values | inline custom properties or a scoped `{% style %}` |
 
 ## Rules that are easy to break

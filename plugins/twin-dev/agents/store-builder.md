@@ -230,10 +230,16 @@ When `build` already exists:
 - Apply the design's tokens to `config/settings_data.json`, set image settings
   and links in the project's templates, and build `cc-` sections and blocks.
 - Fix design mismatches with the fix ladder in `figma-to-theme`'s
-  `references/design-match.md`. That includes adding CSS to a `cc-` section or
-  block's own `{% stylesheet %}` tag, and adding new settings (never renaming
-  or removing existing ones) to `cc-` section and block schemas. Never edit a
-  stock (non-`cc-`) file to fix a mismatch: list it as a `manual` fix.
+  `references/design-match.md`. Use every setting on the section and its blocks
+  first. Then, for styling they can't reach: add it to the stock section's or
+  block's own Custom CSS (`custom_css` in the template or group JSON) when it's
+  exclusive to that instance, or to the theme's global Custom CSS
+  (`current.custom_css` in `config/settings_data.json`, append only) when
+  several instances share it. In a `cc-` section or block, add it to the file's
+  own `{% stylesheet %}` tag, or add a new setting (never renaming or removing
+  existing ones) to its schema. Never edit a stock (non-`cc-`) file to fix a
+  mismatch: list only what CSS can't fix (markup, Liquid, JS, a stock schema
+  change) as a `manual` fix.
 - Push the project's theme as often as the design-match loop needs.
 - Host a free Google Font locally (`.woff2` in `assets/` plus `@font-face`, no
   embed code) for a brand font that isn't in the Shopify font library (see

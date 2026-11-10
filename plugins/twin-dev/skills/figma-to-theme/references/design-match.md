@@ -188,6 +188,39 @@ Line height is the clearest case: when the element has a line-height setting,
 use the closest preset and stop, even if the result is a little off. Add a
 setting or CSS only when the element has no line-height setting at all.
 
+### Maximize the section and block settings first
+
+Levels 3 and below (new settings, new blocks, any CSS) are only allowed after
+the section's and its blocks' own settings are used up. Before you leave level 2
+for an element, do all of this:
+
+- **Read every setting, not the obvious ones.** Run
+  `theme-inventory.mjs --detail <type>` for the section and for each block type
+  in its tree, and go through the full list for the element: layout (width,
+  columns, gap, padding, alignment, order, each with its `_mobile` twin),
+  typography (every `type_preset: custom` field), colours (background, text,
+  border, hover, overlay, opacity), shape (radius, border, shadow where
+  present), media (ratio, size, position, mobile image) and visibility
+  (`show_on_desktop` / `show_on_mobile`).
+- **Set the setting that unlocks the others first.** Many settings are hidden
+  by `visible_if` until a parent is chosen (`type_preset: custom`,
+  `style_class: button-custom`, a custom width, a background type, a border
+  style). A setting that looks missing may only be hidden: switch the parent
+  on, then look again.
+- **Compose with blocks before you reach for CSS.** The layout can often be
+  built from existing blocks: wrap items in a `group` (direction, gap,
+  alignment, `mobile_order`), add a `spacer`, nest groups, reorder
+  `block_order`, use a different block's style variant. Check the allowed
+  child blocks and the presets in the inventory.
+- **Use the range, then fix the rest.** A value outside a setting's range or
+  options (`min`, `max`, `step`, a preset list): set the closest allowed value
+  and go down the ladder only for the difference.
+
+Write one line in `figma-build.md` for every element that goes below level 2:
+the setting you tried and why it can't produce the value. Without that line, the
+element wasn't checked and the fix doesn't count. A QA mismatch that an existing
+setting could have fixed means this step was skipped.
+
 1. **Global theme setting.** The value is a token used across the site (all
    H2s, every primary button). Fix it in `config/settings_data.json`, then
    re-measure every section that uses it.
@@ -200,27 +233,56 @@ setting or CSS only when the element has no line-height setting at all.
    build a new `cc-` section or block with the `horizon-theme` skill. Give it
    settings for every value the design varies, with the design's values as
    defaults and in its preset.
-4. **Styling the settings can't reach, in a `cc-` file.** These are values
-   outside a setting's range or options: negative letter spacing, a shadow, a one-off radius, a hover state. Only do this
-   when the element is rendered by a `cc-` section or block.
-   - **Same for every instance** of that section or block: add the CSS to the
-     **owner file's own `{% stylesheet %}` tag**, the `cc-` section or block
-     that renders the element. If the file has no tag yet, add one (one per
-     file). `{% stylesheet %}` can't contain Liquid, so use the theme's CSS
-     variables (`var(--color-foreground)`, `var(--font-h2--size)`) there, not
-     settings. Keep the selectors scoped to the file's own classes, low
-     specificity, with logical properties. Write a comment naming the design
-     value (`/* Figma: H2 tracking -1.12px */`).
-   - **Differs per instance**, or a merchant would want to change it: **add a
-     setting** to that `cc-` section or block's schema. Give it a new ID, never
-     rename existing ones, add the `t:` label to `locales/en.default.schema.json`,
-     and set the design value as the default. Output it as an inline custom
-     property on the wrapper (`style="--cc-heading-ls: {{ block.settings.heading_letter_spacing }}px"`),
-     use the property in the same file's `{% stylesheet %}`, and set the value
-     in the template.
-5. **Needs a stock-file change: label it `manual`.** Never edit a stock
-   (non-`cc-`) file to fix a mismatch: not its Liquid, `{% stylesheet %}`,
-   schema, `assets/` CSS, `config/settings_schema.json` or
+4. **Styling the settings can't reach.** These are values outside a setting's
+   range or options: negative letter spacing, a shadow, a one-off radius, a
+   hover state. Where it goes depends on who renders the element:
+   - **A stock (non-`cc-`) section or block, or any element of it:** put the
+     CSS in Custom CSS, never in the stock file. Choose by reach:
+     - **Exclusive to that one section or block instance** (this hero's
+       button, that product card's badge on this page): add the rules to that
+       instance's own **Custom CSS**, the `custom_css` array on the section or
+       block in the template or section group JSON (the "Custom CSS" field at
+       the bottom of the section or block in the theme editor). One string per
+       rule. Shopify scopes it to that section or block, so use plain
+       selectors on the element's own classes, low specificity.
+     - **Shared by many instances or pages** (every product card, all H2
+       tracking, the header on every page): add it once to the theme's
+       **global Custom CSS**, the `custom_css` value in `current` of
+       `config/settings_data.json` (Theme settings > Custom CSS in the editor).
+       Append only: never rewrite or remove rules already there. If the theme
+       has no global Custom CSS field, label it `manual` and don't invent one.
+     - When in doubt: one instance → its own Custom CSS; two or more → global.
+     - Comment each rule with the design value (`/* Figma: H2 tracking
+       -1.12px */`). Never use Custom CSS for something an existing setting
+       covers (line height presets, padding, colour): that's level 2. Re-measure
+       after the push to confirm the rule applies, and record it in
+       `figma-build.md` (element, value, which Custom CSS, and why no setting
+       could do it).
+   - **A `cc-` section or block we build:**
+     - **Same for every instance** of that section or block: add the CSS to the
+       **owner file's own `{% stylesheet %}` tag**, the `cc-` section or block
+       that renders the element. If the file has no tag yet, add one (one per
+       file). `{% stylesheet %}` can't contain Liquid, so use the theme's CSS
+       variables (`var(--color-foreground)`, `var(--font-h2--size)`) there, not
+       settings. Keep the selectors scoped to the file's own classes, low
+       specificity, with logical properties. Write a comment naming the design
+       value (`/* Figma: H2 tracking -1.12px */`).
+     - **Differs per instance**, or a merchant would want to change it: **add a
+       setting** to that `cc-` section or block's schema. Give it a new ID, never
+       rename existing ones, add the `t:` label to `locales/en.default.schema.json`,
+       and set the design value as the default. Output it as an inline custom
+       property on the wrapper (`style="--cc-heading-ls: {{ block.settings.heading_letter_spacing }}px"`),
+       use the property in the same file's `{% stylesheet %}`, and set the value
+       in the template.
+     - A one-off tweak on a single instance of a `cc-` section or block that
+       the merchant wouldn't change can go in that instance's Custom CSS
+       instead, as for a stock section.
+5. **Needs a stock-file change CSS can't make: label it `manual`.** Styling
+   never lands here, because level 4 covers it through Custom CSS. Only changes
+   to markup, Liquid logic, JavaScript, a stock schema (a new setting on a stock
+   section or block) or a stock file's own settings list stay `manual`. Never
+   edit a stock (non-`cc-`) file to fix a mismatch: not its Liquid,
+   `{% stylesheet %}`, schema, `assets/` CSS, `config/settings_schema.json` or
    `snippets/theme-styles-variables.liquid`. A developer makes these changes
    by hand. For each one, record the element, the Figma value, the live value,
    the file that owns the style, and the suggested change (the CSS rule, or the
@@ -235,9 +297,9 @@ setting or CSS only when the element has no line-height setting at all.
 
    These and `manual` are the only mismatches allowed to remain.
 
-Before you add CSS or a setting to a `cc-` file, check that no existing
-setting, utility class or snippet (`typography-style`, `spacing-style`,
-`gap-style`, `size-style`) already covers it. Keep each change additive: never
+Before you add CSS (Custom CSS or a `cc-` file's stylesheet) or a setting, check
+that no existing setting, utility class or snippet (`typography-style`,
+`spacing-style`, `gap-style`, `size-style`) already covers it. Keep each change additive: never
 change or remove existing rules, settings or defaults.
 
 ## 5. Loop and stop
