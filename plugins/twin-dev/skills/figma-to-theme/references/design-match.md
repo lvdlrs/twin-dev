@@ -252,6 +252,11 @@ setting could have fixed means this step was skipped.
        Append only: never rewrite or remove rules already there. If the theme
        has no global Custom CSS field, label it `manual` and don't invent one.
      - When in doubt: one instance → its own Custom CSS; two or more → global.
+     - **Custom CSS is the only home for this styling.** Don't put it in a
+       utility snippet or asset (`cc-fonts.liquid` is `@font-face` only), in
+       `layout/theme.liquid`, in a new `cc-styles`/`custom.css` file, or in any
+       stock file. A small style goes in the section's or block's own Custom CSS
+       field; a site-wide one in the global Custom CSS in theme settings.
      - Comment each rule with the design value (`/* Figma: H2 tracking
        -1.12px */`). Never use Custom CSS for something an existing setting
        covers (line height presets, padding, colour): that's level 2. Re-measure

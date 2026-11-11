@@ -265,7 +265,12 @@ How to convert Figma values to this theme:
      inside a `{% style %}` tag. Rendering it needs one line,
      `{% render 'cc-fonts' %}`, before `</head>` in `layout/theme.liquid`. That is
      a stock file, so list it under **Manual fixes**. The font setting keeps the
-     closest library font until the files are in.
+     closest library font until the files are in. **`cc-fonts.liquid` holds
+     `@font-face` rules and nothing else**: no `font-family` assignments, sizes,
+     letter spacing, colours or any other styling. Font choices go through the
+     theme's font settings, and any extra styling goes in Custom CSS (global
+     Custom CSS in theme settings if it's site-wide, the section's or block's own
+     Custom CSS field if it's a small one-off), per `references/design-match.md`.
   **Every weight the design uses must load.** A font setting loads only its
   regular and bold files, so a library font used at 500 or 600 renders at 400 or
   a faked 700. List every family and weight in the design (nav 500, buttons 600,
@@ -719,6 +724,12 @@ exact match for a Figma section. Write the mapping out like this:
 - Components in **Recurring store components** (quick links bar, purchase
   benefits, stock alert, tabbed products, testimonials, Instagram feed) follow
   the rules there.
+- **Stay upgrade-safe.** The project must keep merging cleanly with new base
+  theme versions, so follow **Stay close to the base theme** in the
+  `horizon-theme` skill: the smallest change that matches the design, additive
+  only, a `cc-` block added to a stock section instead of a copy of it, and
+  every deviation (new `cc-` files, Custom CSS rules, copied stock files)
+  listed in `figma-build.md`.
 - **Maximize the section and block settings.** Use the theme's settings as far
   as they go: global settings, then every setting on the section and on each
   block in its tree, including the ones hidden behind a parent setting, the

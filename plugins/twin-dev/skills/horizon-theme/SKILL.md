@@ -88,6 +88,43 @@ or a theme feature, search its docs instead of working from memory:
 Tool names can change between versions; if these are gone, use the ones it
 lists. If it isn't connected, fall back to shopify.dev and say so.
 
+## Stay close to the base theme
+
+The base theme (Capital Commerce's Horizon build) will release new versions,
+and every store project must be able to take them with little or no conflict.
+So every change is judged by one question: **would this still merge cleanly
+when the base updates?** Customise as little as the design needs.
+
+- **Reach for the smallest change first.** In this order: existing global,
+  section and block settings; blocks composed from existing ones; Custom CSS
+  (section/block or global); a new `cc-` file; and only then anything bigger.
+  Stop at the first one that does the job.
+- **Additive only.** Add new files (`cc-` prefix), new settings, new blocks and
+  new template content. Never edit, rename, reorder, reformat or delete a stock
+  file, a stock setting, preset, default or template section ID. No formatting-
+  only or "cleanup" edits to stock files, even harmless ones: they create
+  merge conflicts for nothing.
+- **Extend, don't fork.** To add behaviour to a stock section, add a `cc-`
+  block it can hold (or use an existing block) instead of copying the stock
+  section into a `cc-` copy. A copy stops receiving the base's fixes and
+  features. Copy a stock file only when no block or setting can do it, and then
+  put the base version and source file in a comment at the top so a later
+  update can be compared.
+- **Keep Custom CSS small and safe to upgrade.** Target the element's own
+  classes, not deep chains through the stock markup (`div > div > span`); use
+  the base's CSS variables where they exist; no `!important` unless a stock
+  inline style forces it; one rule per design value, commented. Deep selectors
+  and `!important` break when the base changes its markup.
+- **Don't touch what a setting already owns.** Don't override in CSS or JS
+  something a theme setting controls: the base can change how that setting
+  renders, and your override would fight it.
+- **Keep a deviation list.** `figma-build.md` records every place the project
+  differs from the base: new `cc-` files, Custom CSS rules, copied stock files,
+  and settings changed outside the token sheet. The person upgrading uses it
+  to re-check each one after an update.
+- **When unsure, ask which is smaller.** If two ways reach the design, take the
+  one that touches fewer files and leaves the base's own code untouched.
+
 ## Before you edit
 
 1. Identify the Horizon version (`config/settings_schema.json` → `theme_info`).
@@ -117,6 +154,7 @@ lists. If it isn't connected, fall back to shopify.dev and say so.
 | Styling for one stock section or block instance that no setting reaches | that instance's Custom CSS (`custom_css` in its template or group JSON), not the stock file |
 | Same styling shared across a stock component site-wide | the theme's global Custom CSS (`current.custom_css` in `config/settings_data.json`, append only) |
 | Per-instance values | inline custom properties or a scoped `{% style %}` |
+| Custom styling in a store project that doesn't belong to a `cc-` component | global Custom CSS (site-wide) or the section's or block's own Custom CSS (small one-off), never a utility snippet such as `cc-fonts.liquid` (`@font-face` only), `layout/theme.liquid` or a new catch-all CSS file |
 
 ## Rules that are easy to break
 

@@ -104,11 +104,20 @@ Gap entry:
 - Merchant strings escaped; UI text from locales, not hardcoded.
 - CSS in the owner's `{% stylesheet %}`; theme tokens instead of raw colours;
   logical properties; shared style-owner renders preserved.
+- Upgrade safety: flag any edit to a stock file, setting, preset, default or
+  template section ID; a `cc-` copy of a stock section where a `cc-` block or
+  settings would do; deep selectors through stock markup or `!important` in
+  Custom CSS; CSS or JS that overrides something a theme setting owns.
 - Styling for a stock section or block lives in its Custom CSS (`custom_css`)
   or the global Custom CSS, not in a stock file. Flag Custom CSS that repeats
   something an existing section or block setting can do (padding, gap, colour,
   size, line-height preset, hidden `_mobile` settings), and per-instance rules
   that should be global (or the reverse).
+- Flag custom styling outside Custom CSS or a `cc-` component's own
+  `{% stylesheet %}`: anything other than `@font-face` in `cc-fonts.liquid`, CSS
+  added to `layout/theme.liquid`, or a new catch-all stylesheet or snippet. It
+  belongs in global Custom CSS (site-wide) or the section's or block's Custom
+  CSS (small one-off).
 - Unique IDs include `section.id` or `block.id`.
 
 **Accessibility and performance**

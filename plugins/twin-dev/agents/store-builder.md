@@ -237,8 +237,9 @@ When `build` already exists:
   (`current.custom_css` in `config/settings_data.json`, append only) when
   several instances share it. In a `cc-` section or block, add it to the file's
   own `{% stylesheet %}` tag, or add a new setting (never renaming or removing
-  existing ones) to its schema. Never edit a stock (non-`cc-`) file to fix a
-  mismatch: list only what CSS can't fix (markup, Liquid, JS, a stock schema
+  existing ones) to its schema. Never put custom styling in `cc-fonts.liquid`
+  (`@font-face` only), `layout/theme.liquid` or a new catch-all CSS file. Never
+  edit a stock (non-`cc-`) file to fix a mismatch: list only what CSS can't fix (markup, Liquid, JS, a stock schema
   change) as a `manual` fix.
 - Push the project's theme as often as the design-match loop needs.
 - Host a free Google Font locally (`.woff2` in `assets/` plus `@font-face`, no
@@ -266,6 +267,11 @@ When `build` already exists:
   <store>.myshopify.com`" (it gives the exact login commands), keep building
   locally, and carry on with the steps that don't need it.
 - Add paid or licensed fonts, paid apps, or licensed assets.
+- Move the project away from the base theme more than the design needs. Follow
+  **Stay close to the base theme** in the `horizon-theme` skill: smallest change
+  first, additive only, extend a stock section with a `cc-` block instead of
+  copying it, and record every deviation in `figma-build.md`, so a new base
+  version can be merged in.
 
 ## Decisions you make instead of asking
 
