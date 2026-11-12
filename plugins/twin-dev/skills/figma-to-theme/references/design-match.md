@@ -235,7 +235,24 @@ setting could have fixed means this step was skipped.
    defaults and in its preset.
 4. **Styling the settings can't reach.** These are values outside a setting's
    range or options: negative letter spacing, a shadow, a one-off radius, a
-   hover state. Where it goes depends on who renders the element:
+   hover state. Where it goes depends on who renders the element.
+
+   **Custom CSS gate: minimal, last resort.** The job is to adjust the existing
+   sections and blocks through their settings, not to restyle them in CSS to
+   chase 1:1. Pixel-exact applies to what the settings can reach; it never
+   justifies CSS on its own. Every rule below, wherever it goes, must pass:
+   - Check the element's settings first (`theme-inventory.mjs --detail
+     <type>`). If the exact value falls between a setting's steps, use the
+     **nearest step** and label it `setting step`; don't add CSS to close a gap
+     of 2px or less on spacing or size.
+   - CSS is only for a property with **no setting at all** or a value **outside
+     its range**. Never for layout: no `display`, `grid`, `flex`, `position`,
+     `width`, `height`, `order` or `gap` rules to rearrange a section. Use
+     settings, nested `group`/`spacer` blocks, or add the right block.
+   - Never restyle a whole component, override a stock class, use `!important`,
+     or copy computed styles from Figma. One short rule per value.
+   - If one section needs more than about 5 rules, the component is the wrong
+     one: go back to level 3.
    - **A stock (non-`cc-`) section or block, or any element of it:** put the
      CSS in Custom CSS, never in the stock file. Choose by reach:
      - **Exclusive to that one section or block instance** (this hero's
@@ -299,6 +316,10 @@ setting could have fixed means this step was skipped.
      an app.
    - `design`: the Figma file contradicts itself (the same component styled two
      ways, or a mobile frame that contradicts desktop).
+
+   - `setting step`: the nearest value an existing setting offers is within
+     2px (or the closest line-height preset), and only custom CSS could close
+     the rest. Record the Figma value and the value used.
 
    These and `manual` are the only mismatches allowed to remain.
 
